@@ -1,0 +1,29 @@
+repos:
+- repo: https://github.com/floatingpurr/sync_with_poetry
+  rev: "1.1.0" # the revision or tag to clone at
+  hooks:
+    - id: sync_with_poetry
+      args: [] # optional args
+- repo: https://github.com/psf/black
+  rev: 24.10.0
+  hooks:
+  - id: black
+    language_version: python3.12
+    stages: [pre-commit]
+- repo: https://github.com/PyCQA/isort
+  rev: 5.13.2
+  hooks:
+  - id: isort
+    name: isort (python)
+    stages: [pre-commit]
+- repo: https://github.com/PyCQA/bandit
+  rev: '1.8.5'
+  hooks:
+  - id: bandit
+    stages: [pre-commit]
+- repo: https://github.com/pycqa/pylint
+  rev: v2.17.7
+  hooks:
+  - id: pylint
+    language: system
+    stages: [pre-commit]
