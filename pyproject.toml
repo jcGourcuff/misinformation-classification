@@ -1,0 +1,78 @@
+[tool.poetry]
+name = "usecase-mistral"
+version = "0.0.0"
+description = "A usecase example."
+authors = ["Jean Cyrus de Gourcuff <jeanc.gourcuff@gmail.com>"]
+license = "Proprietary"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.16.1"
+pylint = "^3.3.7"
+pre-commit = "^4.2.0"
+black = "^25.1.0"
+isort = "^6.0.1"
+bandit = "^1.8.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# mypy config
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+exclude = ["draft.py", "tmp/"]
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["yaml.*", "scipy.*", "requests.*", "pyomo.*", "pandas.*"]
+ignore_missing_imports = true
+
+# pylint config
+# https://vald-phoenix.github.io/pylint-errors/
+[tool.pylint.main]
+recursive = true
+max-args=7
+ignore = []
+ignore-paths=[
+    'docs',
+    'draft.py',
+    'tmp/',
+    'depreciated/'
+]
+good-names-rgxs=[
+  'tz',
+]
+# missing-module-docstring
+# missing-class-docstring
+# missing-function-docstring
+# too-few-public-method
+# no-member # not pydantic compatible
+# consider-using-f-string
+# duplicate-code (pylint is bad at that)
+disable = [
+  "C0114",
+  "C0115",
+  "C0116",
+  "R0903",
+  "E1101",
+  "C0209",
+  "R0801",
+]
+extension-pkg-allow-list = ["ujson"]
+
+
+[tool.isort]
+profile = "black"
+skip = [".gitignore", ".dockerignore"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
