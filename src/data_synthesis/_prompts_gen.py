@@ -1,0 +1,112 @@
+import os
+import random
+import uuid
+
+import pandas as pd
+from mistralai import ResponseFormat
+
+from src.inference import BatchedPrompt, run_mistral
+from src.inference._batch_inference import BatchRequest
+
+PWD = os.path.dirname(__file__)
+POSITIVE_SAMPLES_DIR = "./data/synthetic_positive_samples"
+EMOTIONS = ["angry", "serious", "delusional", "neutral", "sarcastic", "evasive"]
+PERSONAE = ["climate_enthusiast", "scientist", "newbie"]
+
+
+def generate_batch_file_for_pos_sample_gen(
+    ipcc_report_blocks: list[str], file_name: str, n_prompt_per_block=3
+):
+    random.seed(42)
+    batch_elems = []
+    for block in ipcc_report_blocks:
+        if len(block) < 100:
+            continue
+        for _ in range(n_prompt_per_block):
+            personae = random.choice(PERSONAE)
+            emotion = random.choice(EMOTIONS)
+            prompt = _get_prompt(block, personae, emotion)
+            batch_elems.append(
+                BatchedPrompt(
+                    custom_id=f"{personae}_{emotion}_{str(uuid.uuid4())}",
+                    max_tokens=500,
+                    temperature=0.7,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": prompt,
+                                },
+                            ],
+                        },
+                    ],
+                )
+            )
+    print(f"Generated {len(batch_elems)} prompts for {file_name}")
+    BatchRequest(prompts=batch_elems).to_jsonl(file_name=file_name)
+
+
+def generate_postive_data_sample(prompt: str) -> str:
+    """
+    For testing.
+    """
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": prompt,
+                },
+            ],
+        },
+    ]
+    res = run_mistral(
+        messages=messages,
+        model="mistral-large-latest",
+        temperature=0.7,
+        max_tokens=500,
+        response_format=_get_response_format(),
+    )
+
+    return res.choices[0].message.content.strip("```").strip("json")
+
+
+def _load_personae(personae: str) -> str:
+    """
+    Load the personae from a text file.
+    """
+    with open(
+        os.path.join(PWD, f"./personae/{personae}.txt"), encoding="utf-8"
+    ) as file:
+        personae_description = file.read().strip()
+    return personae_description
+
+
+def _get_prompt(text_block: str, personae: str, emotion: str) -> str:
+    prompt = (
+        open(os.path.join(PWD, "./prompt.txt"), encoding="utf-8")
+        .read()
+        .format(
+            personae=_load_personae(personae),
+            emotion=emotion,
+            text_block=text_block,
+        )
+    )
+    return prompt
+
+
+def _get_response_format() -> ResponseFormat:
+    return ResponseFormat(
+        json_schema={
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "text",
+                }
+            },
+            "required": ["text"],
+        }
+    )

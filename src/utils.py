@@ -1,10 +1,10 @@
 import os
-from typing import Literal
+import random
 
-from mistralai import Any, Mistral, ResponseFormat
+import pandas as pd
 
 
-def _load_api_key(file_path: str = "./env/MISTRAL_API_KEY") -> None:
+def load_api_key(file_path: str = "./env/MISTRAL_API_KEY") -> None:
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             api_key = file.read().strip()
@@ -13,28 +13,20 @@ def _load_api_key(file_path: str = "./env/MISTRAL_API_KEY") -> None:
         raise FileNotFoundError(f"API key file not found: {file_path}") from err
 
 
-# pylint: disable=too-many-positional-arguments
-def run_mistral(
-    messages: list[dict[str, Any]],
-    model: Literal["mistral-large-latest"],
-    response_format: ResponseFormat | None = None,
-    presence_penalty: float = 0.0,
-    max_tokens: int = 2048,
-    temperature: float | None = None,
-    n_completion: int | None = None,
-) -> Any:
-    _load_api_key()
-    client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+def extract_random_sample(
+    data: pd.DataFrame, size: int
+) -> tuple[pd.DataFrame, list[str]]:
+    data = data.reset_index(drop=True)
+    _gen_id = random.choice(list(range(len(data))), size=size, replace=False)
+    res = [data.loc[i, "quote"] for i in _gen_id]
+    data = data.drop(res, axis=0).reset_index(drop=True)
+    return data, res
 
-    chat_response = client.chat.complete(
-        model=model,
-        messages=messages,
-        response_format=response_format,
-        max_tokens=max_tokens,
-        random_seed=42,
-        presence_penalty=presence_penalty,
-        temperature=temperature,
-        n=n_completion,
-    )
 
-    return chat_response
+def generate_classification_example(class_quote_map: dict[str, list[str]]) -> str:
+    res = []
+    for cls, quotes in class_quote_map.items():
+        for quote in quotes:
+            res.append(f"Statement: {quote}\nCategory: {cls}")
+    random.shuffle(res)
+    return "\n".join(res)

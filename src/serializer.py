@@ -1,5 +1,5 @@
 """
-Implements a generic serializer.
+IMPORTED FROM PERSONAL REPOSITORY
 """
 
 import gzip
