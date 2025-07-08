@@ -7,13 +7,14 @@ import pandas as pd
 import requests
 from datasets import load_dataset
 
-QUOATA_CLIMAT_DATASET = "QuotaClimat/frugalaichallenge-text-train"
+QUOTA_CLIMAT_DATASET = "QuotaClimat/frugalaichallenge-text-train"
 
 # pylint: disable=line-too-long
-IPCC_REPORTS = {
+ReportAlias = Literal["physics_basis", "mitigation", "impact_risk_adaptation"]
+IPCC_REPORTS: dict[ReportAlias, str] = {
     "physics_basis": "https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_SPM.pdf",
     "mitigation": "https://www.ipcc.ch/report/ar6/wg3/downloads/report/IPCC_AR6_WGIII_SPM.pdf",
-    "impact_risk_adaptation": "https://www.ipcc.ch/report/ar6/wg2/downloads/report/IPCC_AR6_WGII_SPM.pdf",
+    "impact_risk_adaptation": "https://www.ipcc.ch/report/ar6/wg2/downloads/report/IPCC_AR6_WGII_SummaryForPolicymakers.pdf",
 }
 
 
@@ -21,7 +22,7 @@ def load_quota_climat_dataset(work_dir: str, reload: bool = False) -> pd.DataFra
     makedirs(work_dir, exist_ok=True)
 
     if reload:
-        dataset = load_dataset(QUOATA_CLIMAT_DATASET, cache_dir=work_dir)
+        dataset = load_dataset(QUOTA_CLIMAT_DATASET, cache_dir=work_dir)
 
         full_dataset = pd.concat(
             [dataset["train"].to_pandas(), dataset["test"].to_pandas()],
@@ -39,7 +40,7 @@ def load_quota_climat_dataset(work_dir: str, reload: bool = False) -> pd.DataFra
 
 def _load_ipcc_report(
     work_dir: str,
-    which: Literal["physics_basis", "mitigation", "impact_risk_adaptation"],
+    which: ReportAlias,
 ):
     makedirs(work_dir, exist_ok=True)
     pdf_file_path = join(work_dir, f"{which}.pdf")

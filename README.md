@@ -32,3 +32,5 @@ Focus on climate change disinformation
 - RAG
 - Fine Tuning
 - Slides
+
+- Truth is irremdiably austere

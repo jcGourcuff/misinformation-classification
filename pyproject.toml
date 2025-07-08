@@ -35,7 +35,7 @@ exclude = ["draft.py", "tmp/"]
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["yaml.*", "scipy.*", "requests.*", "pyomo.*", "pandas.*"]
+module = ["yaml.*", "scipy.*", "requests.*", "pyomo.*", "pandas.*", "fitz.*", "datasets.*", "mistralai.*"]
 ignore_missing_imports = true
 
 # pylint config
