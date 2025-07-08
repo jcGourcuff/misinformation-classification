@@ -17,9 +17,9 @@ def extract_random_sample(
     data: pd.DataFrame, size: int
 ) -> tuple[pd.DataFrame, list[str]]:
     data = data.reset_index(drop=True)
-    _gen_id = random.choice(list(range(len(data))), size=size, replace=False)
+    _gen_id = random.sample(list(range(len(data))), size)
     res = [data.loc[i, "quote"] for i in _gen_id]
-    data = data.drop(res, axis=0).reset_index(drop=True)
+    data = data.drop(_gen_id, axis=0).reset_index(drop=True)
     return data, res
 
 

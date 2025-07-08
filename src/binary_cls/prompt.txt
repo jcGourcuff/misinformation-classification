@@ -13,6 +13,3 @@ Here are some examples:
 <<<
 Statement: {quote}
 >>>
-
-Additional Context (if available):
-"{context}"
