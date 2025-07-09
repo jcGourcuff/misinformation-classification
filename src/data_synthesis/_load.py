@@ -22,8 +22,13 @@ def get_true_quotes(
         }
         for item in get_batch_job_result(file_name=file_name):
             split_custom_id = item["custom_id"].split("_")
-            dataset["personae"].append(split_custom_id[0])
-            dataset["emotion"].append(split_custom_id[1])
+            # hotfix TODO
+            if "climate_enthusiast" in item["custom_id"]:
+                dataset["personae"].append("climate_enthusiast")
+                dataset["emotion"].append(split_custom_id[2])
+            else:
+                dataset["personae"].append(split_custom_id[0])
+                dataset["emotion"].append(split_custom_id[1])
             content = (
                 item["response"]["body"]["choices"][0]["message"]["content"]
                 .replace("\\", "")

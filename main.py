@@ -5,7 +5,9 @@ import re
 from datetime import datetime
 from os import getenv
 from os.path import join
+from typing import Literal
 
+import numpy as np
 import pandas as pd
 from mistralai import Mistral
 from sklearn.metrics import confusion_matrix
@@ -23,6 +25,8 @@ from src.data_synthesis import (
     generate_postive_data_sample,
 )
 from src.data_synthesis._load import get_true_quotes
+from src.evaluation.explanability import get_breakdown_per_contexts
+from src.evaluation.metrics import build_metrics_from_confusion, get_confusion_matrix
 from src.inference import get_batch_job_result, run_batch_mistral
 from src.processing import load_and_process_ipcc_reports, load_quota_climat_dataset
 from src.serializer import ReferenceSerializer
@@ -58,14 +62,17 @@ def generate_synthetic_data_from_ipcc_reports(file_name: str = "data_synthesis_v
     get_true_quotes(file_name=file_name)
 
 
-def binary_classification_task(build_dataset: bool = False, predict: bool = False):
+def binary_classification_task(
+    model: str,
+    run: bool = False,
+    build_dataset: bool = False,
+):
     if build_dataset:
         build_binary_cls_dataset()
 
-    model = "ministral-3b-latest"
     file_name = f"binary_cls_{model}"
 
-    if predict:
+    if run:
         generate_batch_file_for_bin_cls(file_name)
         run_batch_mistral(
             file_name=file_name,
@@ -73,35 +80,25 @@ def binary_classification_task(build_dataset: bool = False, predict: bool = Fals
             mode="chat",
             job_type="binary-cls",
         )
+        return
 
-    return get_binary_cls_result(file_name=file_name, reload=False)
+    result = get_binary_cls_result(model=model, reload=False).fillna("N/A")
+
+    confusion_matrix = get_confusion_matrix(result)
+    print(confusion_matrix)
+    metrics = build_metrics_from_confusion(confusion_matrix)
+    print(metrics)
+
+    miss_predictions = result[result["predicted_label"] != result["label"]].copy()
+
+    for breakdown in get_breakdown_per_contexts(miss_predictions):
+        print(breakdown)
 
 
 def main():
-    res = binary_classification_task(build_dataset=False, predict=False)
-    print(
-        confusion_matrix(
-            res["true_label"],
-            res["predicted_label"],
-            labels=["misinformation", "accurate statement"],
-        )
-    )
-
-    true_info = res[res["true_label"] == "accurate statement"]
-
-    dataset = ReferenceSerializer.load(
-        join(BINARY_CLS_DATASET_DIR, "binary_cls_dataset.pkl.gz")
-    )
-
-    miss_predictions = true_info[
-        true_info["predicted_label"] != "accurate statement"
-    ].index
-
-    miss_prediction_data_set = dataset["dataset"].loc[miss_predictions]
-
-    for quote in miss_prediction_data_set["quote"]:
-        print("\n\n")
-        print(quote)
+    model = "ministral-3b-latest"
+    # model = "ministral-8b-latest"
+    # model = "mistral-small-latest"
 
 
 if __name__ == "__main__":

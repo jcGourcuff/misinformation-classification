@@ -43,3 +43,65 @@ Focus on climate change disinformation
 
 - example fuzzy:
     - "Oh, the ice is melting because of us humans—glaciers are shrinking, Arctic ice is vanishing, and even the Greenland Ice Sheet is dripping away, but don't worry about Antarctica, it's just chilling with no significant trend!"
+
+# First Binary classificatrion
+
+## ministral 3b
+- 'not_relevant' sub label removed
+- missinformation sub labels merged as one class 'missinformation'
+- Binary calssification accuate statement vs missinformation
+- result from conufusion matrix: 
+    - good precision on missinformation
+    - ~ random guess on accurate statements
+- focus on misclassified accurate statements
+    - personae plays a role but little
+    - huge impact of emotion: delusional > sarcastic >> angry >> rest 
+
+- example misclassified misinformation:
+    - Atmospheric CO2 is not a pollutant. It is the single most important chemical constituent of the cycles of plant and animal life
+    - Earth’s temperature naturally warms and cools cyclically throughout time, and warmer periods are typically more conducive to human thriving than colder periods.
+    - Human flourishing depends on energy use, often in invisible and unnoticed ways. A reliable energy supply can feed the hungry, take care of the sick, and ensure a prosperous economic future for society.  It promotes freedom and independence around the world and right here at home,
+                    accurate statement  misinformation
+accurate statement                 323             242
+misinformation                      66            4404
+                    Precision  Recall  F1-Score
+accurate statement      83.03   57.17     67.72
+misinformation          94.79   98.52     96.62
+Average                 88.91   77.84     82.17
+
+## ministral 8b
+- way better recall on accurate statements
+- but much worse on all other metrics
+- accurate statement  FPs only on delusional / sarcastic -> confirms that it is about tone
+                    accurate statement  misinformation
+accurate statement                 518              47
+misinformation                     826            3644
+                    Precision  Recall  F1-Score
+accurate statement      38.54   91.68     54.27
+misinformation          98.73   81.52     89.30
+Average                 68.64   86.60     71.78
+
+## mistral small
+- way better recall on accurate statements
+- Same problem as ministral 8b but less pronounced
+
+                    accurate statement  misinformation
+accurate statement                 521              44
+misinformation                     457            4013
+                    Precision  Recall  F1-Score
+accurate statement      53.27   92.21     67.53
+misinformation          98.92   89.78     94.13
+Average                 76.10   91.00     80.83
+
+- misnformatioon classified as accurate examples:
+   - Solar, wind and hydropower need help. They can’t produce energy that is available around the clock.
+   - In particular, they helped spread a false narrative that arson — and not climate change — was largely to blame for the fires. ‘Bushfires: Firebugs fuelling crisis as national arson arrest toll hits 183,’ read one headline in The Australian, on January 8, 2020. Picked up by Donald Trump, the story was then repeated to millions of Americans by Fox News, also controlled by the Murdoch family.
+   - For the past 4567 million years, the sun and the Earth's orbit have driven climate change cycles.
+
+# Split misinformation into sub classes
+
+# What could have been done
+- Better use/prior research on emotions
+- Reformulate mis information to aligne tones
+- use confidence score 
+- reuse uploaded datasets

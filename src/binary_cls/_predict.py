@@ -47,18 +47,16 @@ def generate_batch_file_for_bin_cls(file_name: str):
     BatchRequest(prompts=batch_elems).to_jsonl(file_name=file_name)
 
 
-def get_binary_cls_result(file_name: str, reload: bool = False):
-
+def get_binary_cls_result(model: str, reload: bool = False):
+    file_name = f"binary_cls_{model}"
     if reload:
         dataset = {
             "index": [],
-            "true_label": [],
             "predicted_label": [],
         }
         for item in get_batch_job_result(file_name=file_name):
             split_custom_id = item["custom_id"].split("_")
-            dataset["index"].append(split_custom_id[0])
-            dataset["true_label"].append(split_custom_id[1])
+            dataset["index"].append(int(split_custom_id[0]))
 
             content = item["response"]["body"]["choices"][0]["message"]["content"]
             if content not in ["accurate statement", "misinformation"]:
@@ -67,9 +65,15 @@ def get_binary_cls_result(file_name: str, reload: bool = False):
                 )
             dataset["predicted_label"].append(content)
         dataset_as_df = pd.DataFrame(dataset).set_index("index")
+
+        # Join to old dataset
+        original_dataset = ReferenceSerializer.load(
+            join(BINARY_CLS_DATASET_DIR, "binary_cls_dataset.pkl.gz")
+        )["dataset"]
+        dataset_as_df = dataset_as_df.join(original_dataset, how="left")
+
         dataset_as_df.to_csv(
-            join(BINARY_CLS_DATASET_DIR, f"{file_name}.csv"), index=True
+            join(BINARY_CLS_DATASET_DIR, f"{file_name}.csv"), index=False
         )
-    return pd.read_csv(
-        join(BINARY_CLS_DATASET_DIR, f"{file_name}.csv"), index_col="index"
-    )
+
+    return pd.read_csv(join(BINARY_CLS_DATASET_DIR, f"{file_name}.csv"))

@@ -2,6 +2,7 @@ import random
 from os import makedirs
 from os.path import join
 
+import numpy as np
 import pandas as pd
 
 from src.data_synthesis import get_true_quotes
@@ -33,10 +34,14 @@ def build_binary_cls_dataset():
     false_quotes = false_quotes[
         false_quotes["label"] != MissInformationLabels.NOT_RELEVANT
     ]
+    false_quotes["context_1"] = false_quotes["label"]
+    false_quotes["context_2"] = "N/A"
     false_quotes["label"] = "misinformation"
 
     true_quotes["label"] = "accurate statement"
-    true_quotes = true_quotes[["label", "quote"]]
+    true_quotes["context_1"] = true_quotes["personae"]
+    true_quotes["context_2"] = true_quotes["emotion"]
+    true_quotes = true_quotes[["label", "quote", "context_1", "context_2"]]
 
     ## Get one sample per label for prompt
     false_quotes, false_examples = extract_random_sample(false_quotes, size=3)
