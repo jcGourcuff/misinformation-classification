@@ -18,11 +18,6 @@ PROCCESSING_DIR = "./data/processed"
 BINARY_CLS_DATASET_DIR = join(PROCCESSING_DIR, "./binary_cls_dataset")
 makedirs(BINARY_CLS_DATASET_DIR, exist_ok=True)
 
-"""
-Use metrics that are not sensitive to class imbalance, such as precision, recall, F1-score, and the area under the ROC curve (AUC-ROC), instead of accuracy.
-Consider using the confusion matrix to get a detailed view of the model's performance across different classes.
-"""
-
 
 def build_binary_cls_dataset():
     random.seed(42)

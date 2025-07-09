@@ -12,13 +12,15 @@ import pandas as pd
 from mistralai import Mistral
 from sklearn.metrics import confusion_matrix
 
-from src.binary_cls._build_data_set import (
-    BINARY_CLS_DATASET_DIR,
+from src.classification.binary import (
     build_binary_cls_dataset,
-)
-from src.binary_cls._predict import (
     generate_batch_file_for_bin_cls,
     get_binary_cls_result,
+)
+from src.classification.multiclass._build_data_set import build_multi_cls_dataset
+from src.classification.multiclass._predict import (
+    generate_batch_file_for_multi_cls,
+    get_multi_cls_result,
 )
 from src.data_synthesis import (
     generate_batch_file_for_pos_sample_gen,
@@ -95,10 +97,46 @@ def binary_classification_task(
         print(breakdown)
 
 
+def multiclass_classification_task(
+    model: str,
+    run: bool = False,
+    build_dataset: bool = False,
+):
+    if build_dataset:
+        build_multi_cls_dataset()
+        return
+
+    file_name = f"multi_cls_{model}"
+
+    if run:
+        generate_batch_file_for_multi_cls(file_name)
+        run_batch_mistral(
+            file_name=file_name,
+            model=model,
+            mode="chat",
+            job_type="multi-cls",
+        )
+        return
+
+    result = get_multi_cls_result(model=model, reload=True).fillna("N/A")
+
+    confusion_matrix = get_confusion_matrix(result)
+    print(confusion_matrix)
+    metrics = build_metrics_from_confusion(confusion_matrix)
+    print(metrics)
+
+    ## THEN switch back to binary classification
+
+
 def main():
-    model = "ministral-3b-latest"
+    # model = "ministral-3b-latest"
     # model = "ministral-8b-latest"
-    # model = "mistral-small-latest"
+    model = "mistral-small-latest"
+    multiclass_classification_task(
+        model=model,
+        build_dataset=False,
+        run=False,
+    )
 
 
 if __name__ == "__main__":

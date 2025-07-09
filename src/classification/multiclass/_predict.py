@@ -6,13 +6,14 @@ import pandas as pd
 from src.inference import BatchedPrompt, BatchRequest, get_batch_job_result
 from src.serializer import ReferenceSerializer
 
-from ._build_data_set import BINARY_CLS_DATASET_DIR
+from ._build_data_set import LABEL_MAP, MULTI_CLS_DATASET_DIR
 
 
-def generate_batch_file_for_bin_cls(file_name: str):
+# to refacto
+def generate_batch_file_for_multi_cls(file_name: str):
 
     dataset = ReferenceSerializer.load(
-        join(BINARY_CLS_DATASET_DIR, "binary_cls_dataset.pkl.gz")
+        join(MULTI_CLS_DATASET_DIR, "multi_cls_dataset.pkl.gz")
     )
 
     prompt = open(join(dirname(__file__), "prompt.txt"), encoding="utf-8").read()
@@ -47,8 +48,8 @@ def generate_batch_file_for_bin_cls(file_name: str):
     BatchRequest(prompts=batch_elems).to_jsonl(file_name=file_name)
 
 
-def get_binary_cls_result(model: str, reload: bool = False):
-    file_name = f"binary_cls_{model}"
+def get_multi_cls_result(model: str, reload: bool = False):
+    file_name = f"multi_cls_{model}"
     if reload:
         dataset = {
             "index": [],
@@ -59,21 +60,22 @@ def get_binary_cls_result(model: str, reload: bool = False):
             dataset["index"].append(int(split_custom_id[0]))
 
             content = item["response"]["body"]["choices"][0]["message"]["content"]
-            if content not in ["accurate statement", "misinformation"]:
+            authorized_labels = list(LABEL_MAP.values()) + ["accurate statement"]
+            if content not in authorized_labels:
                 raise ValueError(
-                    f"Unexpected content: {content}. Expected 'accurate statement' or 'misinformation'."
+                    f"Unexpected content: {content}. Expected one of {', '.join(authorized_labels)}."
                 )
             dataset["predicted_label"].append(content)
         dataset_as_df = pd.DataFrame(dataset).set_index("index")
 
         # Join to old dataset
         original_dataset = ReferenceSerializer.load(
-            join(BINARY_CLS_DATASET_DIR, "binary_cls_dataset.pkl.gz")
+            join(MULTI_CLS_DATASET_DIR, "multi_cls_dataset.pkl.gz")
         )["dataset"]
         dataset_as_df = dataset_as_df.join(original_dataset, how="left")
 
         dataset_as_df.to_csv(
-            join(BINARY_CLS_DATASET_DIR, f"{file_name}.csv"), index=False
+            join(MULTI_CLS_DATASET_DIR, f"{file_name}.csv"), index=False
         )
 
-    return pd.read_csv(join(BINARY_CLS_DATASET_DIR, f"{file_name}.csv"))
+    return pd.read_csv(join(MULTI_CLS_DATASET_DIR, f"{file_name}.csv"))

@@ -16,7 +16,7 @@ def load_api_key(file_path: str = "./env/MISTRAL_API_KEY") -> None:
 def extract_random_sample(
     data: pd.DataFrame, size: int
 ) -> tuple[pd.DataFrame, list[str]]:
-    data = data.reset_index(drop=True)
+    data = data.copy().reset_index(drop=True)
     _gen_id = random.sample(list(range(len(data))), size)
     res = [data.loc[i, "quote"] for i in _gen_id]
     data = data.drop(_gen_id, axis=0).reset_index(drop=True)

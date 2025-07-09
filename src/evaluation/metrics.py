@@ -29,7 +29,9 @@ def build_metrics_from_confusion(confusion_matrix: pd.DataFrame) -> pd.DataFrame
 
 
 def get_confusion_matrix(prediction: pd.DataFrame) -> pd.DataFrame:
-    labels = sorted(prediction["label"].unique())
+    labels = sorted(
+        set(prediction["label"].unique()) | set(prediction["predicted_label"].unique())
+    )
     res = pd.DataFrame(
         confusion_matrix(
             prediction["label"],
