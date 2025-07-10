@@ -139,10 +139,51 @@ science unreliable                 74.78   53.00     62.03
 solutions harmful unnecessary      59.80   76.20     67.01
 Average                            71.94   70.62     70.45
 
+## fine Tuning
+
+v0: ministral 3b 3 epoch, 0.0001lr
+v1: ministral 3b 3 epoch, 0.0001lr
+
+### zero shot, ministral 3b, validation set (~ 1000 samples)
+                               Precision  Recall  F1-Score
+accurate statement                 88.64   34.21     49.37
+fossil fuels needed                90.91   17.54     29.41
+not bad                            24.77   70.13     36.61
+not happening                      53.12   80.41     63.98
+not human                          84.62    7.86     14.38
+proponents biased                  88.50   64.10     74.35
+science unreliable                 43.25   68.12     52.91
+solutions harmful unnecessary      54.69   22.58     31.96
+Average                            66.06   45.62     44.12
+
+### few shot, ministral 3b, validation set (~ 1000 samples) -> ok in terms of repr of original perf.
+
+                               Precision  Recall  F1-Score
+accurate statement                100.00   30.97     47.29
+fossil fuels needed                96.15   44.64     60.97
+not bad                            34.52   76.32     47.54
+not happening                      59.68   75.51     66.67
+not human                          68.52   26.62     38.34
+proponents biased                  84.38   52.26     64.54
+science unreliable                 34.35   84.91     48.91
+solutions harmful unnecessary      77.42   15.58     25.94
+Average                            69.38   50.85     50.03
+
+### zero shot, fine tuned ministral 3b, validation set (~ 1000 samples)
+
 
 
 # What could have been done
 - Better use/prior research on emotions
 - Reformulate mis information to aligne tones
 - use confidence score 
-- reuse uploaded datasets
+- reuse uploaded datasets and associated code repetition
+- tests
+- Should I have used "classifiers" instead of completion models ? Not clear to me, what if the next question is "why" ? 
+
+# info in presentation
+
+- use case description
+- summary tasks and main results
+- more findings
+- repo structure

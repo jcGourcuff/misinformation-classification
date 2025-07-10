@@ -18,6 +18,7 @@ MULTI_CLS_DATASET_DIR = join(PROCCESSING_DIR, "./multi_cls_dataset")
 makedirs(MULTI_CLS_DATASET_DIR, exist_ok=True)
 
 LABEL_MAP = {
+    "accurate statement": "accurate statement",
     "0_not_relevant": "not relevant",
     "1_not_happening": "not happening",
     "2_not_human": "not human",
@@ -84,3 +85,24 @@ def setup_data_for_multi_cls() -> tuple[pd.DataFrame, pd.DataFrame]:
     true_quotes = true_quotes[["label", "quote", "context_1", "context_2"]]
 
     return true_quotes, false_quotes
+
+
+def get_example_string(
+    dataset: pd.DataFrame, n_per_class: int
+) -> tuple[pd.DataFrame, str]:
+    new_dset = []
+    class_quote_map = {}
+    for label in dataset["label"].unique():
+        sub_dset, label_examples = extract_random_sample(
+            dataset[dataset["label"] == label], size=n_per_class
+        )
+        class_quote_map[label] = label_examples
+        new_dset.append(sub_dset)
+    dataset = pd.concat(
+        new_dset,
+        ignore_index=True,
+    )
+
+    example_string = generate_classification_example(class_quote_map=class_quote_map)
+
+    return dataset, example_string

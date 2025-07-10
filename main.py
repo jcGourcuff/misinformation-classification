@@ -17,8 +17,12 @@ from src.classification.binary import (
     generate_batch_file_for_bin_cls,
     get_binary_cls_result,
 )
-from src.classification.multiclass._build_data_set import build_multi_cls_dataset
+from src.classification.multiclass._build_data_set import (
+    build_multi_cls_dataset,
+    get_example_string,
+)
 from src.classification.multiclass._predict import (
+    MULT_CLS_PROMPT_PATH,
     generate_batch_file_for_multi_cls,
     get_multi_cls_result,
 )
@@ -30,7 +34,14 @@ from src.data_synthesis._load import get_true_quotes
 from src.evaluation.explanability import get_breakdown_per_contexts
 from src.evaluation.metrics import build_metrics_from_confusion, get_confusion_matrix
 from src.fine_tune import build_finetune_multi_cls_dataset
+from src.fine_tune._build_data_set import (
+    FINETUNING_MULTI_CLS_PROMPT_PATH,
+    MULTI_CLS_DATASET_DIR,
+    generate_file_for_multi_cls_finetune,
+)
+from src.fine_tune._run import launch_fine_tune_job
 from src.inference import get_batch_job_result, run_batch_mistral
+from src.inference._batch_inference import upload_file
 from src.processing import load_and_process_ipcc_reports, load_quota_climat_dataset
 from src.serializer import ReferenceSerializer
 
@@ -70,13 +81,15 @@ def binary_classification_task(
     run: bool = False,
     build_dataset: bool = False,
 ):
+
+    file_name = f"binary_cls"
     if build_dataset:
+        generate_batch_file_for_bin_cls(file_name)
+        upload_file(file_name)
         build_binary_cls_dataset()
 
-    file_name = f"binary_cls_{model}"
-
     if run:
-        generate_batch_file_for_bin_cls(file_name)
+
         run_batch_mistral(
             file_name=file_name,
             model=model,
@@ -102,15 +115,48 @@ def multiclass_classification_task(
     model: str,
     run: bool = False,
     build_dataset: bool = False,
+    validation: bool = False,
+    zero_shot: bool = False,
 ):
-    if build_dataset:
+    """
+    If validation is false, task is ran over the whole dataset.
+    Otherwise, we use the finetuning's task validation dataset.
+    """
+    if build_dataset and not validation:
         build_multi_cls_dataset()
+
+    file_name = f"multi_cls"
+
+    if not validation:
+        dataset_info = ReferenceSerializer.load(
+            join(MULTI_CLS_DATASET_DIR, "multi_cls_dataset.pkl.gz")
+        )
+        dataset = dataset_info["dataset"]
+    else:
+        file_name += "_validation"
+        dataset = ReferenceSerializer.load(
+            join(MULTI_CLS_DATASET_DIR, "fine_tune_multi_cls_dataset.pkl.gz")
+        )["validation"]
+
+    if zero_shot:
+        prompt_path = FINETUNING_MULTI_CLS_PROMPT_PATH
+        example_string = None
+    else:
+        prompt_path = MULT_CLS_PROMPT_PATH
+        file_name += "_few_shot"
+        dataset, example_string = get_example_string(dataset, n_per_class=1)
+
+    if build_dataset:
+        generate_batch_file_for_multi_cls(
+            file_name,
+            dataset=dataset,
+            prompt_path=prompt_path,
+            example_string=example_string,
+        )
+        upload_file(file_name)
         return
 
-    file_name = f"multi_cls_{model}"
-
     if run:
-        generate_batch_file_for_multi_cls(file_name)
         run_batch_mistral(
             file_name=file_name,
             model=model,
@@ -119,7 +165,9 @@ def multiclass_classification_task(
         )
         return
 
-    result = get_multi_cls_result(model=model, reload=False).fillna("N/A")
+    result = get_multi_cls_result(
+        file_name=file_name, model=model, original_dataset=dataset, reload=True
+    ).fillna("N/A")
 
     confusion_matrix = get_confusion_matrix(result)
     print(confusion_matrix)
@@ -129,17 +177,56 @@ def multiclass_classification_task(
     ## THEN switch back to binary classification
 
 
+def finetune_multi_cls_task(
+    model: str,
+    version: str,
+    epochs: int,
+    run: bool = False,
+    build_dataset: bool = False,
+):
+
+    file_name_train = "fine_tune_multi_cls_dataset_train"
+    file_name_validation = "fine_tune_multi_cls_dataset_validation"
+    # upload_file(file_name_train)
+
+    if build_dataset:
+        build_finetune_multi_cls_dataset()
+        # generate_file_for_multi_cls_finetune()
+        # upload_file(file_name_train, purpose="fine-tune")
+        # upload_file(file_name_validation, purpose="fine-tune")
+
+    if run:
+        launch_fine_tune_job(
+            file_name_train=file_name_train,
+            file_name_validation=file_name_validation,
+            model=model,
+            version=version,
+            epochs=epochs,
+        )
+        return
+
+
 def main():
     model = "ministral-3b-latest"
     # model = "ministral-8b-latest"
     # model = "mistral-small-latest"
-    # multiclass_classification_task(
-    #     model=model,
-    #     build_dataset=False,
-    #     run=False,
-    # )
+    # model = "ministral-3b-latest_fine_tuned_{version}"
 
-    build_finetune_multi_cls_dataset()
+    multiclass_classification_task(
+        model=model,
+        build_dataset=False,
+        run=False,
+        validation=True,
+        zero_shot=False,
+    )
+
+    finetune_multi_cls_task(
+        model=model, build_dataset=False, run=False, version="v3", epochs=0
+    )
+
+    # client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+
+    # pprint.pprint(client.fine_tuning.jobs.list(status="QUEUED"))
 
 
 if __name__ == "__main__":

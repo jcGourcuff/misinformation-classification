@@ -54,7 +54,7 @@ def get_binary_cls_result(model: str, reload: bool = False):
             "index": [],
             "predicted_label": [],
         }
-        for item in get_batch_job_result(file_name=file_name):
+        for item in get_batch_job_result(file_name=file_name, model=model):
             split_custom_id = item["custom_id"].split("_")
             dataset["index"].append(int(split_custom_id[0]))
 
