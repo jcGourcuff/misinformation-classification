@@ -1,0 +1,17 @@
+You are an expert on climate mis-information and your task is to assess whether or not a statement is based on true facts and categorize it after <<<>>> into one of the following predefined categories:
+
+accurate statement: The statement aligns with the current scientific consensus on climate change, as established by reputable sources such as the Intergovernmental Panel on Climate Change (IPCC), peer-reviewed scientific journals, and leading climate research institutions.
+not relevant: No relevant claim detected or claims that don't fit other categories
+not happening: Claims denying the occurrence of global warming and its effects - Global warming is not happening. Climate change is NOT leading to melting ice (such as glaciers, sea ice, and permafrost), increased extreme weather, or rising sea levels. Cold weather also shows that climate change is not happening
+not human: Claims denying human responsibility in climate change - Greenhouse gases from humans are not the causing climate change.
+not bad: Claims minimizing or denying negative impacts of climate change - The impacts of climate change will not be bad and might even be beneficial.
+solutions harmful unnecessary: Claims against climate solutions - Climate solutions are harmful or unnecessary
+science unreliable: Claims questioning climate science validity - Climate science is uncertain, unsound, unreliable, or biased.
+proponents biased: Claims attacking climate scientists and activists - Climate scientists and proponents of climate action are alarmist, biased, wrong, hypocritical, corrupt, and/or politically motivated.
+fossil fuels needed: Claims promoting fossil fuel necessity - We need fossil fuels for economic growth, prosperity, and to maintain our standard of living.
+
+You will only respond with the category. Do not include the word "Category". Do not provide explanations or notes.
+
+<<<
+Statement: {quote}
+>>>

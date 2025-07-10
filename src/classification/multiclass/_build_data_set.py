@@ -2,7 +2,6 @@ import random
 from os import makedirs
 from os.path import join
 
-import numpy as np
 import pandas as pd
 
 from src.data_synthesis import get_true_quotes
@@ -33,25 +32,7 @@ LABEL_MAP = {
 def build_multi_cls_dataset():
     random.seed(42)
 
-    true_quotes = get_true_quotes()
-    false_quotes = load_quota_climat_dataset(RAW_DATA_DIR)[["label", "quote"]]
-
-    # keep same context as in bnry classification
-    false_quotes["context_1"] = false_quotes["label"]
-
-    # Remove irelevant columns as we removed them in binary task
-    # But we keep the label for multi-class classification
-    # to give the opportunity of a 'trash' class for edgy cases
-    false_quotes = false_quotes[
-        false_quotes["label"] != MissInformationLabels.NOT_RELEVANT
-    ]
-    false_quotes["label"] = false_quotes["label"].map(LABEL_MAP)
-    false_quotes["context_2"] = "N/A"
-
-    true_quotes["label"] = "accurate statement"
-    true_quotes["context_1"] = true_quotes["personae"]
-    true_quotes["context_2"] = true_quotes["emotion"]
-    true_quotes = true_quotes[["label", "quote", "context_1", "context_2"]]
+    true_quotes, false_quotes = setup_data_for_multi_cls()
 
     ## Get one sample per label for prompt
     dataset, true_examples = extract_random_sample(true_quotes, size=1)
@@ -79,3 +60,27 @@ def build_multi_cls_dataset():
         },
         join(MULTI_CLS_DATASET_DIR, "multi_cls_dataset.pkl.gz"),
     )
+
+
+def setup_data_for_multi_cls() -> tuple[pd.DataFrame, pd.DataFrame]:
+    true_quotes = get_true_quotes()
+    false_quotes = load_quota_climat_dataset(RAW_DATA_DIR)[["label", "quote"]]
+
+    # keep same context as in bnry classification
+    false_quotes["context_1"] = false_quotes["label"]
+
+    # Remove irelevant columns as we removed them in binary task
+    # But we keep the label for multi-class classification
+    # to give the opportunity of a 'trash' class for edgy cases
+    false_quotes = false_quotes[
+        false_quotes["label"] != MissInformationLabels.NOT_RELEVANT
+    ]
+    false_quotes["label"] = false_quotes["label"].map(LABEL_MAP)
+    false_quotes["context_2"] = "N/A"
+
+    true_quotes["label"] = "accurate statement"
+    true_quotes["context_1"] = true_quotes["personae"]
+    true_quotes["context_2"] = true_quotes["emotion"]
+    true_quotes = true_quotes[["label", "quote", "context_1", "context_2"]]
+
+    return true_quotes, false_quotes

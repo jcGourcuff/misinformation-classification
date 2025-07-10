@@ -29,6 +29,7 @@ from src.data_synthesis import (
 from src.data_synthesis._load import get_true_quotes
 from src.evaluation.explanability import get_breakdown_per_contexts
 from src.evaluation.metrics import build_metrics_from_confusion, get_confusion_matrix
+from src.fine_tune import build_finetune_multi_cls_dataset
 from src.inference import get_batch_job_result, run_batch_mistral
 from src.processing import load_and_process_ipcc_reports, load_quota_climat_dataset
 from src.serializer import ReferenceSerializer
@@ -137,6 +138,8 @@ def main():
     #     build_dataset=False,
     #     run=False,
     # )
+
+    build_finetune_multi_cls_dataset()
 
 
 if __name__ == "__main__":
