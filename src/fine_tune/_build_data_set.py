@@ -3,9 +3,10 @@ from os import makedirs
 from os.path import dirname, join
 
 import pandas as pd
+from mistralai import AssistantMessage, UserMessage
 
 from src.classification.multiclass._build_data_set import setup_data_for_multi_cls
-from src.inference._batch_inference import BatchedPrompt, BatchRequest
+from src.inference._batch_inference import BatchRequest
 from src.processing.reformat_data import reformat_jsonl
 from src.serializer import ReferenceSerializer
 
@@ -29,15 +30,16 @@ def _generate_file_for_multi_cls_finetune(which: str = "train"):
         join(MULTI_CLS_DATASET_DIR, "fine_tune_multi_cls_dataset.pkl.gz")
     )[which]
 
-    prompt = open(FINETUNING_MULTI_CLS_PROMPT_PATH, encoding="utf-8").read()
+    with open(FINETUNING_MULTI_CLS_PROMPT_PATH, encoding="utf-8") as f:
+        prompt = f.read()
     batch_elems = []
     for quote, label in zip(dataset["quote"], dataset["label"]):
         batch_elems.append(
             json.dumps(
                 {
                     "messages": [
-                        {"role": "user", "content": prompt.format(quote=quote)},
-                        {"role": "assistant", "content": label},
+                        UserMessage(content=prompt.format(quote=quote)),
+                        AssistantMessage(content=label),
                     ]
                 }
             )

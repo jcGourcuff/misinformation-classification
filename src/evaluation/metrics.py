@@ -3,13 +3,14 @@ import pandas as pd
 from sklearn.metrics import confusion_matrix
 
 
-def build_metrics_from_confusion(confusion_matrix: pd.DataFrame) -> pd.DataFrame:
-    metrics = pd.DataFrame(index=confusion_matrix.index)
+# pylint: disable=unsubscriptable-object,unsupported-assignment-operation
+def build_metrics_from_confusion(confusion_mat: pd.DataFrame) -> pd.DataFrame:
+    metrics = pd.DataFrame(index=confusion_mat.index)
 
-    metrics["TP"] = np.diag(confusion_matrix.values)
-    metrics["FN"] = confusion_matrix.sum(axis=1) - metrics["TP"]
-    metrics["FP"] = confusion_matrix.sum(axis=0) - metrics["TP"]
-    metrics["TN"] = confusion_matrix.sum().sum() - (
+    metrics["TP"] = np.diag(confusion_mat.values)
+    metrics["FN"] = confusion_mat.sum(axis=1) - metrics["TP"]
+    metrics["FP"] = confusion_mat.sum(axis=0) - metrics["TP"]
+    metrics["TN"] = confusion_mat.sum().sum() - (
         metrics["TP"] + metrics["FN"] + metrics["FP"]
     )
     metrics = metrics.drop("not relevant")

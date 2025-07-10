@@ -15,7 +15,7 @@ def get_true_quotes(
     file_name: str = "data_synthesis_v0", reload: bool = False
 ) -> pd.DataFrame:
     if reload:
-        dataset = {
+        dataset: dict[str, list[str]] = {
             "personae": [],
             "emotion": [],
             "quote": [],

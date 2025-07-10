@@ -2,7 +2,6 @@ import random
 from os import makedirs
 from os.path import join
 
-import numpy as np
 import pandas as pd
 
 from src.data_synthesis import get_true_quotes

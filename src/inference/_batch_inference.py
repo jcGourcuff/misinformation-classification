@@ -4,9 +4,8 @@ from dataclasses import dataclass
 from os.path import join
 from typing import Literal
 
-from mistralai import BatchJobOut, Mistral
+from mistralai import AssistantMessage, Mistral, UserMessage
 
-from src.processing.reformat_data import reformat_jsonl
 from src.serializer import ReferenceSerializer
 
 WK_DIR = "./tmp/batch_requests"
@@ -30,11 +29,10 @@ if not os.path.isfile(FILE_ID_MAP_FILE):
 class BatchedPrompt:
     custom_id: str
     max_tokens: int
-    messages: list[dict[str, str]]
+    messages: list[AssistantMessage | UserMessage]
     temperature: float | None = None
 
     def format(self):
-
         json_res = {
             "custom_id": self.custom_id,
             "body": {
@@ -45,7 +43,7 @@ class BatchedPrompt:
         }
 
         if self.temperature is not None:
-            json_res["body"]["temperature"] = self.temperature
+            json_res["body"]["temperature"] = self.temperature  # type: ignore
         return json.dumps(json_res)
 
 
@@ -100,7 +98,7 @@ def run_batch_mistral(
     model=str,
     mode: Literal["chat", "fim"] = "chat",
     job_type: str = "testing",
-) -> BatchJobOut:
+) -> None:
     """
     Run batch inference with Mistral API.
     """
@@ -139,7 +137,10 @@ def get_batch_job_result(file_name: str, model: str | None = None) -> list[dict]
 
     retrieved_job = client.batch.jobs.get(job_id=job_id)
 
-    output_file_stream = client.files.download(file_id=retrieved_job.output_file)
+    if not isinstance(file_id := retrieved_job.output_file, str):
+        raise ValueError(f"Invalid output file: {retrieved_job.output_file}")
+
+    output_file_stream = client.files.download(file_id=file_id)
 
     res = []
     for line in output_file_stream.iter_lines():

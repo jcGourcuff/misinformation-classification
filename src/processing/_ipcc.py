@@ -52,7 +52,7 @@ def _compile_ocr_processed_reports(work_dir: str):
 
     ReferenceSerializer.dump(
         data=all_entries,
-        file_path=join(work_dir, f"processed_IPCC_sections.pkl.gz"),
+        file_path=join(work_dir, "processed_IPCC_sections.pkl.gz"),
     )
 
 
@@ -62,7 +62,7 @@ def _get_entries_from_ocr_processed(report: str, work_dir: str) -> list[str]:
     )
 
     pattern = r"\n[A-Z]\.\d+\.\d+"
-    result = []
+    result: list[str] = []
     for page in file["pages"]:
         if not re.search(pattern, page["markdown"]):
             continue

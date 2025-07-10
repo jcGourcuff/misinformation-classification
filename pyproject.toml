@@ -48,7 +48,8 @@ ignore-paths=[
     'docs',
     'draft.py',
     'tmp/',
-    'depreciated/'
+    'depreciated/',
+    "src/processing/reformat_data.py",
 ]
 good-names-rgxs=[
   'tz',

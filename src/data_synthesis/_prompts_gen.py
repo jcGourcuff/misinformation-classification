@@ -2,8 +2,13 @@ import os
 import random
 import uuid
 
-import pandas as pd
-from mistralai import ResponseFormat
+from mistralai import (
+    AssistantMessage,
+    JSONSchema,
+    ResponseFormat,
+    TextChunk,
+    UserMessage,
+)
 
 from src.inference import BatchedPrompt, run_mistral
 from src.inference._batch_inference import BatchRequest
@@ -32,15 +37,11 @@ def generate_batch_file_for_pos_sample_gen(
                     max_tokens=500,
                     temperature=0.7,
                     messages=[
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": prompt,
-                                },
+                        UserMessage(
+                            content=[
+                                TextChunk(text=prompt),
                             ],
-                        },
+                        ),
                     ],
                 )
             )
@@ -52,16 +53,12 @@ def generate_postive_data_sample(prompt: str) -> str:
     """
     For testing.
     """
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": prompt,
-                },
+    messages: list[UserMessage | AssistantMessage] = [
+        UserMessage(
+            content=[
+                TextChunk(text=prompt),
             ],
-        },
+        ),
     ]
     res = run_mistral(
         messages=messages,
@@ -86,27 +83,27 @@ def _load_personae(personae: str) -> str:
 
 
 def _get_prompt(text_block: str, personae: str, emotion: str) -> str:
-    prompt = (
-        open(os.path.join(PWD, "./prompt.txt"), encoding="utf-8")
-        .read()
-        .format(
+    with open(os.path.join(PWD, "./prompt.txt"), encoding="utf-8") as f:
+        prompt = f.read().format(
             personae=_load_personae(personae),
             emotion=emotion,
             text_block=text_block,
         )
-    )
     return prompt
 
 
 def _get_response_format() -> ResponseFormat:
     return ResponseFormat(
-        json_schema={
-            "type": "object",
-            "properties": {
-                "text": {
-                    "type": "text",
-                }
+        json_schema=JSONSchema(
+            name="response",
+            schema_definition={
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "text",
+                    }
+                },
+                "required": ["text"],
             },
-            "required": ["text"],
-        }
+        )
     )

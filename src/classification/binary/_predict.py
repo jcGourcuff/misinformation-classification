@@ -2,6 +2,7 @@ import uuid
 from os.path import dirname, join
 
 import pandas as pd
+from mistralai import TextChunk, UserMessage
 
 from src.inference import BatchedPrompt, BatchRequest, get_batch_job_result
 from src.serializer import ReferenceSerializer
@@ -14,8 +15,8 @@ def generate_batch_file_for_bin_cls(file_name: str):
     dataset = ReferenceSerializer.load(
         join(BINARY_CLS_DATASET_DIR, "binary_cls_dataset.pkl.gz")
     )
-
-    prompt = open(join(dirname(__file__), "prompt.txt"), encoding="utf-8").read()
+    with open(join(dirname(__file__), "prompt.txt"), encoding="utf-8") as f:
+        prompt = f.read()
     batch_elems = []
     for quote, label, idx in zip(
         dataset["dataset"]["quote"],
@@ -27,18 +28,16 @@ def generate_batch_file_for_bin_cls(file_name: str):
                 custom_id=f"{idx}_{label}_{str(uuid.uuid4())}",
                 max_tokens=10,
                 messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": prompt.format(
+                    UserMessage(
+                        content=[
+                            TextChunk(
+                                text=prompt.format(
                                     examples=dataset["example_string"],
                                     quote=quote,
                                 ),
-                            },
+                            ),
                         ],
-                    },
+                    ),
                 ],
             )
         )
@@ -50,7 +49,7 @@ def generate_batch_file_for_bin_cls(file_name: str):
 def get_binary_cls_result(model: str, reload: bool = False):
     file_name = f"binary_cls_{model}"
     if reload:
-        dataset = {
+        dataset: dict = {
             "index": [],
             "predicted_label": [],
         }
@@ -61,7 +60,8 @@ def get_binary_cls_result(model: str, reload: bool = False):
             content = item["response"]["body"]["choices"][0]["message"]["content"]
             if content not in ["accurate statement", "misinformation"]:
                 raise ValueError(
-                    f"Unexpected content: {content}. Expected 'accurate statement' or 'misinformation'."
+                    f"Unexpected content: {content}. "
+                    "Expected 'accurate statement' or 'misinformation'."
                 )
             dataset["predicted_label"].append(content)
         dataset_as_df = pd.DataFrame(dataset).set_index("index")

@@ -16,9 +16,9 @@ repos:
   - id: isort
     name: isort (python)
     stages: [pre-commit]
-# - repo: https://github.com/pycqa/pylint
-#   rev: v2.17.7
-#   hooks:
-#   - id: pylint
-#     language: system
-#     stages: [pre-commit]
+- repo: https://github.com/pycqa/pylint
+  rev: v2.17.7
+  hooks:
+  - id: pylint
+    language: system
+    stages: [pre-commit]

@@ -3,9 +3,9 @@ import uuid
 from os.path import dirname, join
 
 import pandas as pd
+from mistralai import TextChunk, UserMessage
 
 from src.inference import BatchedPrompt, BatchRequest, get_batch_job_result
-from src.serializer import ReferenceSerializer
 
 from ._build_data_set import LABEL_MAP, MULTI_CLS_DATASET_DIR
 
@@ -20,7 +20,9 @@ def generate_batch_file_for_multi_cls(
     example_string: str | None = None,
 ):
 
-    prompt = open(prompt_path, encoding="utf-8").read()
+    with open(prompt_path, encoding="utf-8") as f:
+        prompt = f.read()
+
     if example_string is not None:
         prompt = prompt.replace("{examples}", example_string)
     batch_elems = []
@@ -30,15 +32,13 @@ def generate_batch_file_for_multi_cls(
                 custom_id=f"{idx}_{label}_{str(uuid.uuid4())}",
                 max_tokens=10,
                 messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": prompt.format(quote=quote),
-                            },
+                    UserMessage(
+                        content=[
+                            TextChunk(
+                                text=prompt.format(quote=quote),
+                            ),
                         ],
-                    },
+                    ),
                 ],
             )
         )
@@ -51,7 +51,7 @@ def get_multi_cls_result(
     file_name: str, model: str, original_dataset: pd.DataFrame, reload: bool = False
 ):
     if reload or not os.path.isfile(join(MULTI_CLS_DATASET_DIR, f"{file_name}.csv")):
-        dataset = {
+        dataset: dict = {
             "index": [],
             "predicted_label": [],
         }
@@ -75,18 +75,3 @@ def get_multi_cls_result(
         )
 
     return pd.read_csv(join(MULTI_CLS_DATASET_DIR, f"{file_name}.csv"))
-
-
-def get_example_string(dataset: pd.DataFrame, n__per_class: int):
-    if dataset.empty:
-        return None
-
-    # Get a few examples from each class
-    examples = []
-    for label in dataset["label"].unique():
-        class_examples = dataset[dataset["label"] == label].sample(
-            n=n__per_class, replace=True
-        )
-        examples.extend(class_examples["quote"].tolist())
-
-    return "\n".join(examples)

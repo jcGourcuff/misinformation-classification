@@ -1,12 +1,12 @@
 import os
-from typing import Literal
+from typing import Any, Literal
 
-from mistralai import Any, Mistral, ResponseFormat
+from mistralai import AssistantMessage, Mistral, ResponseFormat, UserMessage
 
 
 # pylint: disable=too-many-positional-arguments
 def run_mistral(
-    messages: list[dict[str, Any]],
+    messages: list[UserMessage | AssistantMessage],
     model: Literal["mistral-large-latest"],
     response_format: ResponseFormat | None = None,
     presence_penalty: float = 0.0,
@@ -19,7 +19,7 @@ def run_mistral(
 
     chat_response = client.chat.complete(
         model=model,
-        messages=messages,
+        messages=messages,  # type: ignore
         response_format=response_format,
         max_tokens=max_tokens,
         random_seed=42,
