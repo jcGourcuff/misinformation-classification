@@ -1,6 +1,4 @@
 """
-Taken from:
-https://raw.githubusercontent.com/mistralai/mistral-finetune/main/utils/reformat_data.py
 --2025-07-10 17:20:45--  https://raw.githubusercontent.com/mistralai/mistral-finetune/main/utils/reformat_data.py
 """
 
@@ -8,6 +6,8 @@ import json
 import os
 import random
 import string
+
+from src.utils.logging import logger
 
 
 def reformat_jsonl(input_file):
@@ -38,7 +38,7 @@ def reformat_jsonl(input_file):
                         if key in msg and msg[key] == "":
                             if "tool_calls" in msg:
                                 del msg[key]
-                                print(
+                                logger.warning(
                                     f"Delete empty '{key}' field in tool call message in line {idx}"
                                 )
 
@@ -79,6 +79,6 @@ def reformat_jsonl(input_file):
             if not skip_sample:
                 outfile.write(json.dumps(data) + "\n")
             else:
-                print(f"Skipped {idx}th sample")
+                logger.warning(f"Skipped {idx}th sample")
 
     os.rename(output_file, input_file)

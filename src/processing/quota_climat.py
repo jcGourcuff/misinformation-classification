@@ -1,11 +1,10 @@
 from enum import StrEnum
-from os import makedirs
 from os.path import join
 
 import pandas as pd
 from datasets import load_dataset
 
-QUOTA_CLIMAT_DATASET = "QuotaClimat/frugalaichallenge-text-train"
+from .constants import QUOTA_CLIMAT_DATASET
 
 
 class MissInformationLabels(StrEnum):
@@ -20,8 +19,6 @@ class MissInformationLabels(StrEnum):
 
 
 def load_quota_climat_dataset(work_dir: str, reload: bool = False) -> pd.DataFrame:
-    makedirs(work_dir, exist_ok=True)
-
     if reload:
         dataset = load_dataset(QUOTA_CLIMAT_DATASET, cache_dir=work_dir)
 
