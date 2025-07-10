@@ -1,13 +1,12 @@
 import re
 from os.path import isfile, join
+from typing import get_args
 
 import requests
 
+from src.conf import IPCC_REPORTS, PROCESSED_IPCC_SECTIONS_FILE, ReportAlias
 from src.mistral.ocr import parse_report_with_ocr
-from src.utils.logging import logger
-from src.utils.serializer import ReferenceSerializer
-
-from ..constants import IPCC_REPORTS, PROCESSED_IPCC_SECTIONS_FILE, ReportAlias
+from src.utils import ReferenceSerializer, logger
 
 
 def load_and_process_ipcc_reports(work_dir: str, reload: bool = False) -> list[str]:
@@ -40,7 +39,7 @@ def _load_ipcc_report(work_dir: str, report: ReportAlias):
 
 def _compile_ocr_processed_reports(work_dir: str):
     all_entries = []
-    for report in ["physics_basis", "mitigation", "impact_risk_adaptation"]:
+    for report in get_args(ReportAlias):
         all_entries.extend(
             _get_entries_from_ocr_processed(report=report, work_dir=work_dir)
         )

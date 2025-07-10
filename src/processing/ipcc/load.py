@@ -3,9 +3,8 @@ from os.path import join
 
 import pandas as pd
 
+from src.conf import IPCC_DIR
 from src.mistral.inference.batch import get_batch_job_result
-
-from ..constants import IPCC_DIR
 
 
 def get_accurate_quotes(

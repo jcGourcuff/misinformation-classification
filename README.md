@@ -188,3 +188,13 @@ Average                            69.38   50.85     50.03
 - more findings
 - repo structure
 - logging
+
+
+# General process
+
+- Get / Clean all data
+- Given a task
+    - Create clean dataset(s)
+    - Create prompt(s) & request files
+    - Run task (e.g. finetune, inference)
+    - Fetch results & evaluate

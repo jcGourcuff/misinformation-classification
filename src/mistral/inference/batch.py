@@ -6,23 +6,8 @@ from typing import Literal
 
 from mistralai import AssistantMessage, Mistral, UserMessage
 
-from src.serializer import ReferenceSerializer
-
-WK_DIR = "./tmp/batch_requests"
-MODELS = [
-    "ministral-3b-latest",
-    "ministral-8b-latest",
-    "mistral-small-latest",
-    "mistral-large-latest",
-]
-JOB_ID_MAP_FILE = join(WK_DIR, "file_name_job_id_map.yaml")
-FILE_ID_MAP_FILE = join(WK_DIR, "file_name_file_id_map.yaml")
-
-os.makedirs(WK_DIR, exist_ok=True)
-if not os.path.isfile(JOB_ID_MAP_FILE):
-    ReferenceSerializer.dump(data={}, file_path=JOB_ID_MAP_FILE)
-if not os.path.isfile(FILE_ID_MAP_FILE):
-    ReferenceSerializer.dump(data={}, file_path=FILE_ID_MAP_FILE)
+from src.conf import FILE_ID_MAP_FILE, JOB_ID_MAP_FILE, REQUEST_DIR
+from src.utils import ReferenceSerializer, logger
 
 
 @dataclass
@@ -53,14 +38,12 @@ class BatchRequest:
 
     @staticmethod
     def file_path(file_name: str) -> str:
-        return join(WK_DIR, f"{file_name}.jsonl")
+        return join(REQUEST_DIR, f"{file_name}.jsonl")
 
     def to_jsonl(self, file_name: str) -> None:
         """
         Save the batch request to a JSONL file.
         """
-
-        os.makedirs(WK_DIR, exist_ok=True)
         file_path = BatchRequest.file_path(file_name)
         with open(file_path, "wb") as file:
             for prompt in self.prompts:
@@ -79,6 +62,7 @@ def upload_file(
 ) -> None:
     client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 
+    logger.info("Uploading file %s for purpose %s", file_name, purpose)
     batch_data = client.files.upload(
         file={
             "file_name": f"{file_name}.jsonl",
@@ -96,7 +80,6 @@ def upload_file(
 def run_batch_mistral(
     file_name: str,
     model=str,
-    mode: Literal["chat", "fim"] = "chat",
     job_type: str = "testing",
 ) -> None:
     """
@@ -107,12 +90,12 @@ def run_batch_mistral(
 
     id_map = ReferenceSerializer.load(file_path=FILE_ID_MAP_FILE)
 
-    endpoint = "/v1/chat/completions" if mode == "chat" else "/v1/fim/completions"
+    logger.info("Running batch job for file %s with model %s", file_name, model)
     created_job = client.batch.jobs.create(
         input_files=[id_map[file_name]],
         model=model,
-        endpoint=endpoint,
         metadata={"job_type": job_type},
+        endpoint="/v1/chat/completions",
     )
 
     id_map = ReferenceSerializer.load(file_path=JOB_ID_MAP_FILE)
@@ -121,20 +104,18 @@ def run_batch_mistral(
     ReferenceSerializer.dump(data=id_map, file_path=JOB_ID_MAP_FILE)
 
 
-def get_batch_job_result(file_name: str, model: str | None = None) -> list[dict]:
+def get_batch_job_result(file_name: str) -> list[dict]:
     """
     Get the batch job by file name.
     """
+    file_name = file_name.split("/")[-1].split(".")[0]
     id_map = ReferenceSerializer.load(file_path=JOB_ID_MAP_FILE)
 
-    file_name_ = file_name
-    if model is not None:
-        file_name_ += f"_{model}"
-
-    job_id = id_map[file_name_]
+    job_id = id_map[file_name]
 
     client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 
+    logger.info("Retrieving job for file %s", file_name)
     retrieved_job = client.batch.jobs.get(job_id=job_id)
 
     if not isinstance(file_id := retrieved_job.output_file, str):

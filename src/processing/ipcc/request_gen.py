@@ -12,7 +12,7 @@ from mistralai import (
 
 from src.mistral.inference.batch import BatchedPrompt, BatchRequest
 from src.mistral.inference.simple import run_mistral
-from src.utils.logging import logger
+from src.utils import logger
 
 PWD = os.path.dirname(__file__)
 EMOTIONS = ["angry", "serious", "delusional", "neutral", "sarcastic", "evasive"]

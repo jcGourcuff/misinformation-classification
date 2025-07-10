@@ -2,14 +2,11 @@ import os
 
 from mistralai import CompletionJobOut, Mistral, TrainingFileTypedDict
 
-from src.inference._batch_inference import FILE_ID_MAP_FILE, JOB_ID_MAP_FILE
-from src.serializer import ReferenceSerializer
-from src.utils import load_api_key
-
-load_api_key()
+from src.conf import FILE_ID_MAP_FILE, JOB_ID_MAP_FILE
+from src.utils import ReferenceSerializer, logger
 
 
-def launch_fine_tune_job(
+def launch_finetune_job(
     file_name_train: str,
     file_name_validation: str,
     model: str,
@@ -24,6 +21,12 @@ def launch_fine_tune_job(
 
     id_map = ReferenceSerializer.load(file_path=FILE_ID_MAP_FILE)
 
+    logger.info(
+        "Launching finetune job for training file %s, model %s, %s epochs",
+        file_name_train,
+        model,
+        epochs,
+    )
     created_job = client.fine_tuning.jobs.create(
         model=model,
         training_files=[

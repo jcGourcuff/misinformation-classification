@@ -7,7 +7,7 @@ import os
 import random
 import string
 
-from src.utils.logging import logger
+from src.utils import logger
 
 
 def reformat_jsonl(input_file):

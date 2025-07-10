@@ -1,5 +1,5 @@
 """
-IMPORTED FROM PERSONAL REPOSITORY
+Imported from personal repository.
 """
 
 import gzip
