@@ -118,7 +118,7 @@ def multiclass_classification_task(
         )
         return
 
-    result = get_multi_cls_result(model=model, reload=True).fillna("N/A")
+    result = get_multi_cls_result(model=model, reload=False).fillna("N/A")
 
     confusion_matrix = get_confusion_matrix(result)
     print(confusion_matrix)
@@ -129,14 +129,14 @@ def multiclass_classification_task(
 
 
 def main():
-    # model = "ministral-3b-latest"
+    model = "ministral-3b-latest"
     # model = "ministral-8b-latest"
-    model = "mistral-small-latest"
-    multiclass_classification_task(
-        model=model,
-        build_dataset=False,
-        run=False,
-    )
+    # model = "mistral-small-latest"
+    # multiclass_classification_task(
+    #     model=model,
+    #     build_dataset=False,
+    #     run=False,
+    # )
 
 
 if __name__ == "__main__":

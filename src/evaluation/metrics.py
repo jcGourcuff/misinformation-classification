@@ -12,6 +12,7 @@ def build_metrics_from_confusion(confusion_matrix: pd.DataFrame) -> pd.DataFrame
     metrics["TN"] = confusion_matrix.sum().sum() - (
         metrics["TP"] + metrics["FN"] + metrics["FP"]
     )
+    metrics = metrics.drop("not relevant")
 
     metrics["Precision"] = (
         100 * metrics["TP"] / (metrics["TP"] + metrics["FP"])

@@ -1,3 +1,4 @@
+import os
 import uuid
 from os.path import dirname, join
 
@@ -50,22 +51,23 @@ def generate_batch_file_for_multi_cls(file_name: str):
 
 def get_multi_cls_result(model: str, reload: bool = False):
     file_name = f"multi_cls_{model}"
-    if reload:
+    if reload or not os.path.isfile(join(MULTI_CLS_DATASET_DIR, f"{file_name}.csv")):
         dataset = {
             "index": [],
             "predicted_label": [],
         }
         for item in get_batch_job_result(file_name=file_name):
-            split_custom_id = item["custom_id"].split("_")
-            dataset["index"].append(int(split_custom_id[0]))
 
             content = item["response"]["body"]["choices"][0]["message"]["content"]
             authorized_labels = list(LABEL_MAP.values()) + ["accurate statement"]
             if content not in authorized_labels:
-                raise ValueError(
-                    f"Unexpected content: {content}. Expected one of {', '.join(authorized_labels)}."
-                )
+                print(f"Invalid output: {content}.")
+                continue
+
             dataset["predicted_label"].append(content)
+            split_custom_id = item["custom_id"].split("_")
+            dataset["index"].append(int(split_custom_id[0]))
+
         dataset_as_df = pd.DataFrame(dataset).set_index("index")
 
         # Join to old dataset

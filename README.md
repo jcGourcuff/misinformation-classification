@@ -100,6 +100,45 @@ Average                 76.10   91.00     80.83
 
 # Split misinformation into sub classes
 
+## ministral 3b
+
+                               Precision  Recall  F1-Score
+accurate statement                 97.65   14.64     25.46
+fossil fuels needed                73.66   52.80     61.51
+not bad                            25.19   76.62     37.91
+not happening                      49.29   84.19     62.18
+not human                          57.93   58.35     58.14
+proponents biased                  86.26   43.41     57.76
+science unreliable                 55.28   64.75     59.64
+solutions harmful unnecessary      73.04   19.28     30.51
+Average                            64.79   51.76     49.14
+
+## ministral 8b
+
+                               Precision  Recall  F1-Score
+accurate statement                 84.34   54.14     65.95
+fossil fuels needed                76.75   61.19     68.09
+not bad                            51.83   40.52     45.48
+not happening                      54.27   78.11     64.04
+not human                          79.12   30.81     44.35
+proponents biased                  90.00   39.18     54.59
+science unreliable                 36.97   88.62     52.17
+solutions harmful unnecessary      81.12   35.58     49.46
+Average                            69.30   53.52     55.52
+
+## mistral small
+
+                               Precision  Recall  F1-Score
+accurate statement                 77.13   86.24     81.43
+fossil fuels needed                64.90   81.47     72.25
+not bad                            66.77   55.84     60.82
+not happening                      88.14   65.27     75.00
+not human                          72.39   66.29     69.21
+proponents biased                  71.59   80.67     75.86
+science unreliable                 74.78   53.00     62.03
+solutions harmful unnecessary      59.80   76.20     67.01
+Average                            71.94   70.62     70.45
+
 
 
 # What could have been done
