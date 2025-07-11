@@ -92,7 +92,6 @@ def evaluate(args):
     metrics = build_metrics_from_confusion(confusion_matrix)
 
     metrics.to_csv(join(result_sub_dir, "metrics.csv"))
-    print(metrics)
     confusion_matrix.to_csv(join(result_sub_dir, "confusion_matrix.csv"))
     result.to_csv(join(result_sub_dir, "prediction.csv"), index=False)
 

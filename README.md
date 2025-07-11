@@ -16,8 +16,6 @@ Improvement: Use RAG to cross-check claim with news articles / Wikipedia
 
 Impact: Huge societal benefit (education, journalism, politics)
 
-Evaluation: Truth classification F1, hallucination score, explainability
-
 Focus on climate change disinformation
 
 
@@ -290,3 +288,72 @@ Average                            83.02   81.09     81.76
     - Create prompt(s) & request files
     - Run task (e.g. finetune, inference)
     - Fetch results & evaluate
+
+
+
+
+# How to Use the Document Processing and Classification Tool
+
+This tool provides functionalities for loading data, generating synthetic samples, and performing classification tasks. Below are the instructions for using the tool.
+
+## Commands
+
+### Load Data
+
+To load data using Mistral's API:
+
+```bash
+python main.py load
+```
+
+### Generate Synthetic Samples
+
+To generate synthetic accurate quote samples:
+
+```bash
+python main.py synthesize
+```
+
+### Classification Task
+
+To perform classification tasks, use the `class` command with the following options:
+
+```bash
+python main.py class --task <task_type> --stage <stage> [--model <model_name>] [--few-shot] [--eval-set <evaluation_set>]
+```
+
+#### Options
+
+- `--task`: Classification task type. Choose from `binary` or `multiclass`.
+- `--stage`: Processing stage. Choose from:
+  - `build`: Creates necessary files from processed data.
+  - `run`: Uploads files to Mistral API and launches inference job.
+  - `eval`: Evaluates the results of the inference job and saves metrics.
+- `--model`: Model to use. Options include:
+  - `ministral-3b-latest`
+  - `ministral-8b-latest`
+  - `mistral-small-latest`
+  - `tuned-1-epoch`
+  - `tuned-3-epochs`
+  - `tuned-10-epochs`
+  Default is `ministral-3b-latest`.
+- `--few-shot`: Use few-shot learning. Default is `False`. Note that zero-shot is not available for binary classification.
+- `--eval-set`: Evaluation set to use. Choose from:
+  - `global`: For all data.
+  - `validation`: For the validation set used for fine-tuning.
+  Default is `global`.
+
+#### Example Usage
+
+```bash
+python main.py class --task binary --stage build --model ministral-3b-latest --few-shot --eval-set global
+```
+
+```bash
+python main.py class --task multiclass --stage eval --model tuned-3-epochs --eval-set validation
+```
+
+## Notes
+
+- Ensure that the necessary data and configurations are set up before running the commands.
+- The tool uses Mistral's API for certain operations, so ensure you have the proper access and credentials.
