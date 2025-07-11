@@ -27,7 +27,7 @@ def generate_multi_cls_request_file(
     example_string = None
     if examples > 0:
         dataset_, example_string = get_example_string(
-            dataset=dataset,
+            dataset=dataset_,
             n_per_class=examples,
         )
         prompt = prompt.replace("{examples}", example_string)

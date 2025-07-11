@@ -169,20 +169,96 @@ science unreliable                 34.35   84.91     48.91
 solutions harmful unnecessary      77.42   15.58     25.94
 Average                            69.38   50.85     50.03
 
-### zero shot, fine tuned ministral 3b, validation set (~ 1000 samples)
+### zero/few shot, fine tuned ministral 3b, validation set (~ 1000 samples)
 
 
-- 1 epoch model (v1): 
+#### 1 epoch model (v1): 
     Train loss	Validation loss	Validation mean token accuracy
 	0.371709	0.499476	1.4137
 
-- 3 epoch model (v0): 
+- zero shot
+                               Precision  Recall  F1-Score
+accurate statement                 96.81   79.82     87.50
+fossil fuels needed                89.19   57.89     70.21
+not bad                            74.03   74.03     74.03
+not happening                      82.71   74.32     78.29
+not human                          70.34   72.86     71.58
+proponents biased                  79.11   80.13     79.62
+science unreliable                 69.88   72.50     71.17
+solutions harmful unnecessary      67.51   85.81     75.57
+Average                            78.70   74.67     76.00
+
+- few shot
+                               Precision  Recall  F1-Score
+accurate statement                 97.75   76.99     86.14
+fossil fuels needed                77.78   75.00     76.36
+not bad                            58.93   86.84     70.21
+not happening                      77.33   78.91     78.11
+not human                          67.38   68.35     67.86
+proponents biased                  78.34   79.35     78.84
+science unreliable                 72.92   66.04     69.31
+solutions harmful unnecessary      78.95   77.92     78.43
+Average                            76.17   76.18     75.66
+
+
+#### 3 epoch model (v0): 
     Train loss	Validation loss	Validation mean token accuracy
     0.163866	0.255559	1.193798
 
-- 10 epoch model (v3): 
+- zero shot
+
+                               Precision  Recall  F1-Score
+accurate statement                 96.55   98.25     97.39
+fossil fuels needed                96.88   54.39     69.67
+not bad                            80.25   84.42     82.28
+not happening                      83.33   87.84     85.53
+not human                          83.97   78.57     81.18
+proponents biased                  86.23   76.28     80.95
+science unreliable                 76.88   76.88     76.88
+solutions harmful unnecessary      72.54   90.32     80.46
+Average                            84.58   80.87     81.79
+
+- few shot 
+                               Precision  Recall  F1-Score
+accurate statement                 96.36   93.81     95.07
+fossil fuels needed                93.55   51.79     66.67
+not bad                            77.53   90.79     83.64
+not happening                      76.47   88.44     82.02
+not human                          74.03   82.01     77.82
+proponents biased                  78.57   78.06     78.31
+science unreliable                 85.98   57.86     69.17
+solutions harmful unnecessary      72.28   86.36     78.70
+Average                            81.85   78.64     78.92
+
+#### 10 epoch model (v3): 
     Train loss	Validation loss	Validation mean token accuracy
 	0.031279	0.233954	1.176054
+
+- zero shot
+
+                               Precision  Recall  F1-Score
+accurate statement                 98.28  100.00     99.13
+fossil fuels needed                95.12   68.42     79.59
+not bad                            84.29   76.62     80.27
+not happening                      83.78   83.78     83.78
+not human                          81.43   81.43     81.43
+proponents biased                  83.11   78.85     80.92
+science unreliable                 75.00   76.88     75.93
+solutions harmful unnecessary      76.11   88.39     81.79
+Average                            84.64   81.80     82.86
+
+- few shot
+                               Precision  Recall  F1-Score
+accurate statement                 99.10   97.35     98.22
+fossil fuels needed                87.23   73.21     79.61
+not bad                            86.36   75.00     80.28
+not happening                      82.58   87.07     84.77
+not human                          74.84   85.61     79.86
+proponents biased                  74.57   83.23     78.66
+science unreliable                 78.63   64.78     71.04
+solutions harmful unnecessary      80.89   82.47     81.67
+Average                            83.02   81.09     81.76
+
 
 --> Model learned, probably some underfit at 1 epoch, and some overfit at 10 epochs
 
