@@ -49,7 +49,7 @@ python main.py class --task <task_type> --stage <stage> [--model <model_name>] [
   - `tuned-3-epochs`
   - `tuned-10-epochs`
 
-  Default is `ministral-3b-latest`. The model refered to in the presention is `tuned-10-epochs`.
+  Default is `ministral-3b-latest`.
 - `--few-shot`: Use few-shot learning. Default is `False`. Note that zero-shot is not available for binary classification.
 - `--eval-set`: Evaluation set to use. Choose from:
   - `global`: For all data.
