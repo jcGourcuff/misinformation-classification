@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from os.path import join
 from typing import Literal
 
-from mistralai import AssistantMessage, Mistral, UserMessage
+from mistralai import Mistral
 
 from src.conf import FILE_ID_MAP_FILE, JOB_ID_MAP_FILE, REQUEST_DIR
 from src.utils import ReferenceSerializer, logger
@@ -14,7 +14,7 @@ from src.utils import ReferenceSerializer, logger
 class BatchedPrompt:
     custom_id: str
     max_tokens: int
-    messages: list[AssistantMessage | UserMessage]
+    messages: list[str]
     temperature: float | None = None
 
     def format(self):

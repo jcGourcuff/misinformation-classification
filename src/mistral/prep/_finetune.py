@@ -1,8 +1,6 @@
 import json
 from typing import Literal
 
-from mistralai import AssistantMessage, UserMessage
-
 from src.conf import (
     FINETUNE_DATASET_FILE,
     FINETUNE_TRAIN_FILE,
@@ -33,8 +31,8 @@ def _generate_finetune_file(which: Literal["train", "validation"]):
             json.dumps(
                 {
                     "messages": [
-                        UserMessage(content=prompt.format(quote=quote)),
-                        AssistantMessage(content=label),
+                        {"role": "user", "content": prompt.format(quote=quote)},
+                        {"role": "assistant", "content": label},
                     ]
                 }
             )

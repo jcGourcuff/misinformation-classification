@@ -4,55 +4,55 @@ from typing import get_args
 
 import requests
 
-from src.conf import IPCC_REPORTS, PROCESSED_IPCC_SECTIONS_FILE, ReportAlias
+from src.conf import IPCC_DIR, IPCC_REPORTS, PROCESSED_IPCC_SECTIONS_FILE, ReportAlias
 from src.mistral.ocr import parse_report_with_ocr
 from src.utils import ReferenceSerializer, logger
 
 
-def load_and_process_ipcc_reports(work_dir: str, reload: bool = False) -> list[str]:
+def load_and_process_ipcc_reports(reload: bool = False) -> list[str]:
     """
     Returns a list of sections from the IPCC reports.
     """
-    file_path = join(work_dir, f"{PROCESSED_IPCC_SECTIONS_FILE}.pkl.gz")
+    file_path = join(IPCC_DIR, f"{PROCESSED_IPCC_SECTIONS_FILE}.pkl.gz")
     if reload or not isfile(file_path):
-        logger.info(
-            "Loading IPCC reports from %s and processing them with OCR...",
-            work_dir,
-        )
         for report in IPCC_REPORTS:
-            _load_ipcc_report(work_dir=work_dir, report=report)
+            _load_ipcc_report(report=report)
 
-        _compile_ocr_processed_reports(work_dir=work_dir)
+        _compile_ocr_processed_reports()
+    else:
+        logger.info(
+            "IPCC reports already processed. Loading from %s",
+            file_path,
+        )
     return ReferenceSerializer.load(
-        file_path=join(work_dir, f"{PROCESSED_IPCC_SECTIONS_FILE}.pkl.gz")
+        file_path=join(IPCC_DIR, f"{PROCESSED_IPCC_SECTIONS_FILE}.pkl.gz")
     )
 
 
-def _load_ipcc_report(work_dir: str, report: ReportAlias):
-    pdf_file_path = join(work_dir, f"{report}.pdf")
+def _load_ipcc_report(report: ReportAlias):
+    pdf_file_path = join(IPCC_DIR, f"{report}.pdf")
     with open(pdf_file_path, "wb") as file:
+        logger.info("Downloading IPPC's %s ", IPCC_REPORTS[report])
         data = requests.get(IPCC_REPORTS[report], timeout=10)
         file.write(data.content)
 
-    parse_report_with_ocr(report, work_dir=work_dir)
+    parse_report_with_ocr(report)
 
 
-def _compile_ocr_processed_reports(work_dir: str):
+def _compile_ocr_processed_reports():
     all_entries = []
     for report in get_args(ReportAlias):
-        all_entries.extend(
-            _get_entries_from_ocr_processed(report=report, work_dir=work_dir)
-        )
+        all_entries.extend(_get_entries_from_ocr_processed(report=report))
 
     ReferenceSerializer.dump(
         data=all_entries,
-        file_path=join(work_dir, "processed_IPCC_sections.pkl.gz"),
+        file_path=join(IPCC_DIR, f"{PROCESSED_IPCC_SECTIONS_FILE}.pkl.gz"),
     )
 
 
-def _get_entries_from_ocr_processed(report: ReportAlias, work_dir: str) -> list[str]:
+def _get_entries_from_ocr_processed(report: ReportAlias) -> list[str]:
     file = ReferenceSerializer.load(
-        file_path=join(work_dir, f"ocr_processed_{report}.pkl.gz")
+        file_path=join(IPCC_DIR, f"ocr_processed_{report}.pkl.gz")
     )
 
     pattern = r"\n[A-Z]\.\d+\.\d+"

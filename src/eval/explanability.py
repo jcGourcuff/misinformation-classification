@@ -8,9 +8,18 @@ import pandas as pd
 
 
 def get_breakdown_per_contexts(
-    preddictions: pd.DataFrame,
+    preddictions: pd.DataFrame, which: Literal["TP", "FN"] = "FN"
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     preddictions = preddictions.copy()
+
+    if which == "TP":
+        preddictions = preddictions[
+            preddictions["predicted_label"] == preddictions["label"]
+        ]
+    elif which == "FN":
+        preddictions = preddictions[
+            preddictions["predicted_label"] != preddictions["label"]
+        ]
 
     accurate_statements = preddictions[preddictions["label"] == "accurate statement"]
 
@@ -25,7 +34,7 @@ def get_breakdown_per_contexts(
         }
     )
 
-    misinformation_per_per_sub_class = _get_breakdown(
+    misinformation_per_sub_class = _get_breakdown(
         preddictions[preddictions["label"] == "misinformation"], "context_1"
     ).rename(
         columns={
@@ -33,7 +42,7 @@ def get_breakdown_per_contexts(
         }
     )
 
-    return accurate_per_personae, accurate_per_emotion, misinformation_per_per_sub_class
+    return accurate_per_personae, accurate_per_emotion, misinformation_per_sub_class
 
 
 def _get_breakdown(

@@ -5,6 +5,7 @@ import pandas as pd
 from datasets import load_dataset
 
 from src.conf import QUOTA_CLIMAT_DATASET, QUOTA_CLIMAT_DIR
+from src.utils import logger
 
 
 class MissInformationLabels(StrEnum):
@@ -34,6 +35,11 @@ LABEL_MAP = {
 def load_quota_climat_dataset(reload: bool = False) -> pd.DataFrame:
     file_path = join(QUOTA_CLIMAT_DIR, "quota_climat_dataset.csv")
     if reload or not isfile(file_path):
+
+        logger.info(
+            "Downloading Hugging Face's %s ",
+            QUOTA_CLIMAT_DIR,
+        )
         dataset = load_dataset(QUOTA_CLIMAT_DATASET, cache_dir=QUOTA_CLIMAT_DIR)
 
         full_dataset = pd.concat(

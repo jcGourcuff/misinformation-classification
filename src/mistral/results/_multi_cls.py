@@ -1,7 +1,6 @@
 from os.path import isfile, join
 
 import pandas as pd
-from typing_extensions import Literal
 
 from src.conf import (
     FINETUNE_DATASET_FILE,
@@ -9,6 +8,7 @@ from src.conf import (
     MULTI_CLS_DATASET_FILE,
 )
 from src.mistral.inference.batch import get_batch_job_result
+from src.mistral.prep import Task
 from src.processing.quota_climat import LABEL_MAP
 from src.utils import logger
 
@@ -16,14 +16,12 @@ from ._utils import get_result_file_name
 
 
 def get_multi_cls_result(
-    task: Literal[
-        "multi_cls_global",
-        "multi_cls_validation_zero_shot",
-        "multi_cls_validation_few_shots",
-    ],
+    task: Task,
     model: str,
     reload: bool = False,
 ):
+    if task == "binary_cls":
+        raise ValueError("This function is for multi-class classification tasks only.")
     if task == "multi_cls_global":
         original_dataset = pd.read_csv(MULTI_CLS_DATASET_FILE)
     else:

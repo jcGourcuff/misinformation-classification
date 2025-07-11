@@ -23,6 +23,7 @@ IPCC_REPORTS: dict[ReportAlias, str] = {
 PROCESSED_IPCC_SECTIONS_FILE = "processed_ipcc_sections"
 IPCC_DIR = join(RAW_DATA_DIR, "IPCC")
 makedirs(IPCC_DIR, exist_ok=True)
+DATA_SYNTHESIS_FILE_NAME = "data_synthesis_v1"
 
 # Misinformation dataset
 QUOTA_CLIMAT_DATASET = "QuotaClimat/frugalaichallenge-text-train"
@@ -57,3 +58,7 @@ FINETUNE_DATASET_FILE = join(
 # for requests
 FINETUNE_TRAIN_FILE = "fine_tune_multi_cls_dataset_train"
 FINETUNE_VALIDATION_FILE = "fine_tune_multi_cls_dataset_validation"
+
+# Results
+RESULTS_DIR = join(PROCCESSED_DIR, "results")
+makedirs(RESULTS_DIR, exist_ok=True)

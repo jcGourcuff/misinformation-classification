@@ -2,14 +2,9 @@ import os
 import random
 import uuid
 
-from mistralai import (
-    AssistantMessage,
-    JSONSchema,
-    ResponseFormat,
-    TextChunk,
-    UserMessage,
-)
+from mistralai import JSONSchema, ResponseFormat
 
+from src.conf import DATA_SYNTHESIS_FILE_NAME
 from src.mistral.inference.batch import BatchedPrompt, BatchRequest
 from src.mistral.inference.simple import run_mistral
 from src.utils import logger
@@ -20,7 +15,8 @@ PERSONAE = ["climate_enthusiast", "scientist", "newbie"]
 
 
 def generate_request_file_for_accurate_sample_gen(
-    ipcc_report_blocks: list[str], file_name: str, n_prompt_per_block=3
+    ipcc_report_blocks: list[str],
+    n_prompt_per_block=3,
 ):
     random.seed(42)
     batch_elems = []
@@ -37,28 +33,28 @@ def generate_request_file_for_accurate_sample_gen(
                     max_tokens=500,
                     temperature=0.7,
                     messages=[
-                        UserMessage(
-                            content=[
-                                TextChunk(text=prompt),
-                            ],
-                        ),
+                        {
+                            "role": "user",
+                            "content": [{"type": "text", "text": prompt}],
+                        },
                     ],
                 )
             )
-    logger.info("Generated %s prompts for %s", len(batch_elems), file_name)
-    BatchRequest(prompts=batch_elems).to_jsonl(file_name=file_name)
+    logger.info(
+        "Generated %s prompts for %s", len(batch_elems), DATA_SYNTHESIS_FILE_NAME
+    )
+    BatchRequest(prompts=batch_elems).to_jsonl(file_name=DATA_SYNTHESIS_FILE_NAME)
 
 
 def generate_accurate_data_sample(prompt: str) -> str:
     """
     For testing.
     """
-    messages: list[UserMessage | AssistantMessage] = [
-        UserMessage(
-            content=[
-                TextChunk(text=prompt),
-            ],
-        ),
+    messages: list[str] = [
+        {
+            "role": "user",
+            "content": [{"text": prompt}],
+        },
     ]
     res = run_mistral(
         messages=messages,

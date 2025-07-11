@@ -1,8 +1,6 @@
 import uuid
 from typing import Literal
 
-from mistralai import TextChunk, UserMessage
-
 from src.conf import FINETUNE_DATASET_FILE, MULTI_CLS_DATASET_FILE
 from src.mistral.inference.batch import BatchedPrompt, BatchRequest
 from src.prompts import Prompt, load_prompt
@@ -13,10 +11,10 @@ from ._utils import get_example_string
 
 def generate_multi_cls_request_file(
     file_name: str,
-    dataset: Literal["global_eval", "validation"],
+    dataset: Literal["global", "validation"],
     examples: int = 1,
 ):
-    if dataset == "global_eval":
+    if dataset == "global":
         dataset_ = ReferenceSerializer.load(MULTI_CLS_DATASET_FILE)
     else:
         dataset_ = ReferenceSerializer.load(FINETUNE_DATASET_FILE)["validation"]
@@ -41,13 +39,12 @@ def generate_multi_cls_request_file(
                 custom_id=f"{idx}_{label}_{str(uuid.uuid4())}",
                 max_tokens=10,
                 messages=[
-                    UserMessage(
-                        content=[
-                            TextChunk(
-                                text=prompt.format(quote=quote),
-                            ),
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt.format(quote=quote)}
                         ],
-                    ),
+                    },
                 ],
             )
         )

@@ -1,7 +1,5 @@
 import uuid
 
-from mistralai import TextChunk, UserMessage
-
 from src.conf import BINARY_CLS_DATASET_FILE
 from src.prompts import load_prompt
 from src.utils import ReferenceSerializer, logger
@@ -28,16 +26,17 @@ def generate_bin_cls_request_file(file_name: str):
                 custom_id=f"{idx}_{label}_{str(uuid.uuid4())}",
                 max_tokens=10,
                 messages=[
-                    UserMessage(
-                        content=[
-                            TextChunk(
-                                text=prompt.format(
-                                    examples=example_string,
-                                    quote=quote,
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": prompt.format(
+                                    examples=example_string, quote=quote
                                 ),
-                            ),
+                            },
                         ],
-                    ),
+                    },
                 ],
             )
         )

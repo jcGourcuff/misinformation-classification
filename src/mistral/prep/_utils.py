@@ -1,6 +1,31 @@
 import random
+from typing import Literal, cast
 
 import pandas as pd
+
+Task = Literal[
+    "binary_cls",
+    "multi_cls_global",
+    "multi_cls_validation_zero_shot",
+    "multi_cls_validation_few_shots",
+]
+
+
+def get_task_full_name(
+    task: Literal["binary_cls", "multi_cls"],
+    eval_set: Literal["global", "validation"],
+    few_shot: bool,
+) -> Task:
+    if task == "binary_cls":
+        return "binary_cls"
+    file_name = f"{task}_{eval_set}"
+
+    if few_shot:
+        file_name += "_few_shots"
+    else:
+        file_name += "_zero_shot"
+
+    return cast(Task, file_name)
 
 
 def get_example_string(

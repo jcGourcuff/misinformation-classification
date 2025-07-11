@@ -1,17 +1,17 @@
 import json
 import os
-from ntpath import join
+from os.path import join
 from pathlib import Path
 
 from mistralai import DocumentURLChunk, Mistral
 
-from src.conf import ReportAlias
+from src.conf import IPCC_DIR, ReportAlias
 from src.utils import ReferenceSerializer, logger
 
 
-def parse_report_with_ocr(report_alias: ReportAlias, work_dir: str) -> None:
+def parse_report_with_ocr(report_alias: ReportAlias) -> None:
     client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
-    file_name = join(work_dir, f"{report_alias}.pdf")
+    file_name = join(IPCC_DIR, f"{report_alias}.pdf")
 
     file = Path(file_name)
     if not file.is_file():
@@ -40,8 +40,8 @@ def parse_report_with_ocr(report_alias: ReportAlias, work_dir: str) -> None:
 
     ReferenceSerializer.dump(
         data=response_dict,
-        file_path=join(work_dir, f"ocr_processed_{report_alias}.pkl.gz"),
+        file_path=join(IPCC_DIR, f"ocr_processed_{report_alias}.pkl.gz"),
     )
     logger.info(
-        "Done. Saved at %s", join(work_dir, f"ocr_processed_{report_alias}.pkl.gz")
+        "Done. Saved at %s", join(IPCC_DIR, f"ocr_processed_{report_alias}.pkl.gz")
     )
