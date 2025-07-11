@@ -172,6 +172,22 @@ Average                            69.38   50.85     50.03
 ### zero shot, fine tuned ministral 3b, validation set (~ 1000 samples)
 
 
+- 1 epoch model (v1): 
+    Train loss	Validation loss	Validation mean token accuracy
+	0.371709	0.499476	1.4137
+
+- 3 epoch model (v0): 
+    Train loss	Validation loss	Validation mean token accuracy
+    0.163866	0.255559	1.193798
+
+- 10 epoch model (v3): 
+    Train loss	Validation loss	Validation mean token accuracy
+	0.031279	0.233954	1.176054
+
+--> Model learned, probably some underfit at 1 epoch, and some overfit at 10 epochs
+
+
+    
 
 # What could have been done
 - Better use/prior research on emotions

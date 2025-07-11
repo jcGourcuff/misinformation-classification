@@ -2,7 +2,7 @@ import argparse
 from os import makedirs
 from os.path import join
 
-from src.conf import DATA_SYNTHESIS_FILE_NAME, RESULTS_DIR
+from src.conf import DATA_SYNTHESIS_FILE_NAME, RESULTS_DIR, TUNDED_MODEL_MAP
 from src.eval.explanability import get_breakdown_per_contexts
 from src.eval.metrics import build_metrics_from_confusion, get_confusion_matrix
 from src.mistral.inference.batch import run_batch_mistral, upload_file
@@ -26,12 +26,14 @@ from src.processing.task import (
 from src.utils import logger
 
 
-def load():
+# pylint: disable=unused-argument
+def load(args):
     load_quota_climat_dataset()
     load_and_process_ipcc_reports()
 
 
-def generate_synthetic_samples():
+# pylint: disable=unused-argument
+def generate_synthetic_samples(args):
     text_blocks = load_and_process_ipcc_reports()
 
     generate_request_file_for_accurate_sample_gen(ipcc_report_blocks=text_blocks)
@@ -60,7 +62,8 @@ def build(args):
             dataset=args.eval_set,
             examples=int(args.few_shot),  # One example per class
         )
-    logger.error("Unknown task: %s", args.task)
+    else:
+        logger.error("Unknown task: %s", args.task)
 
 
 def run(args):
@@ -183,7 +186,9 @@ def main():
             "ministral-3b-latest",
             "ministral-8b-latest",
             "mistral-small-latest",
-            # "ministral-3b-latest-v0", fine-tuned model
+            "tuned-1-epoch",
+            "tuned-3-epochs",
+            "tuned-10-epochs",
         ],
         default="ministral-3b-latest",
         help="Model to use (default: ministral-3b-latest)",
@@ -191,9 +196,9 @@ def main():
     classify_parser.add_argument(
         "--few-shot",
         action="store_true",
-        default=True,
+        default=False,
         help=(
-            "Use few-shot learning (default: True).\n"
+            "Use few-shot learning (default: False).\n"
             "Zero Shot is not available for binary classification"
         ),
     )
@@ -210,7 +215,10 @@ def main():
     classify_parser.set_defaults(func=classify)
 
     args = parser.parse_args()
-    args.func()
+    # could be better managed
+    args.model = TUNDED_MODEL_MAP.get(args.model, args.model)
+
+    args.func(args)
 
 
 if __name__ == "__main__":

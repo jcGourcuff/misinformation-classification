@@ -23,7 +23,7 @@ IPCC_REPORTS: dict[ReportAlias, str] = {
 PROCESSED_IPCC_SECTIONS_FILE = "processed_ipcc_sections"
 IPCC_DIR = join(RAW_DATA_DIR, "IPCC")
 makedirs(IPCC_DIR, exist_ok=True)
-DATA_SYNTHESIS_FILE_NAME = "data_synthesis_v1"
+DATA_SYNTHESIS_FILE_NAME = "data_synthesis_v0"
 
 # Misinformation dataset
 QUOTA_CLIMAT_DATASET = "QuotaClimat/frugalaichallenge-text-train"
@@ -53,11 +53,16 @@ if not isfile(FILE_ID_MAP_FILE):
 
 # Fine tuning
 FINETUNE_DATASET_FILE = join(
-    MULTI_CLS_DATASET_FILE, "fine_tune_multi_cls_dataset.pkl.gz"
+    MULTI_CLS_DATASET_DIR, "fine_tune_multi_cls_dataset.pkl.gz"
 )
 # for requests
 FINETUNE_TRAIN_FILE = "fine_tune_multi_cls_dataset_train"
 FINETUNE_VALIDATION_FILE = "fine_tune_multi_cls_dataset_validation"
+TUNDED_MODEL_MAP = {
+    "tuned-1-epoch": "ft:ministral-3b-latest:86bd8222:20250710:tuned-v1:f6fc3c55",
+    "tuned-3-epochs": "ft:ministral-3b-latest:86bd8222:20250710:tuned-v0:9f31e260",
+    "tuned-10-epochs": "ft:ministral-3b-latest:86bd8222:20250710:tuned-v3:c21a3348",
+}
 
 # Results
 RESULTS_DIR = join(PROCCESSED_DIR, "results")

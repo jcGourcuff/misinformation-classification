@@ -13,7 +13,10 @@ def build_metrics_from_confusion(confusion_mat: pd.DataFrame) -> pd.DataFrame:
     metrics["TN"] = confusion_mat.sum().sum() - (
         metrics["TP"] + metrics["FN"] + metrics["FP"]
     )
-    metrics = metrics.drop("not relevant")
+    try:
+        metrics = metrics.drop("not relevant")
+    except KeyError:
+        pass
 
     metrics["Precision"] = (
         100 * metrics["TP"] / (metrics["TP"] + metrics["FP"])
