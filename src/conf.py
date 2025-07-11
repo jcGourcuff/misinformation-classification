@@ -23,7 +23,7 @@ IPCC_REPORTS: dict[ReportAlias, str] = {
 PROCESSED_IPCC_SECTIONS_FILE = "processed_ipcc_sections"
 IPCC_DIR = join(RAW_DATA_DIR, "IPCC")
 makedirs(IPCC_DIR, exist_ok=True)
-DATA_SYNTHESIS_FILE_NAME = "data_synthesis_v0"
+DATA_SYNTHETIC_FILE_NAME = "data_synthesis_v0"
 
 # Misinformation dataset
 QUOTA_CLIMAT_DATASET = "QuotaClimat/frugalaichallenge-text-train"

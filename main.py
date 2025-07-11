@@ -2,7 +2,7 @@ import argparse
 from os import makedirs
 from os.path import join
 
-from src.conf import DATA_SYNTHESIS_FILE_NAME, RESULTS_DIR, TUNDED_MODEL_MAP
+from src.conf import DATA_SYNTHETIC_FILE_NAME, RESULTS_DIR, TUNDED_MODEL_MAP
 from src.eval.explanability import get_breakdown_per_contexts
 from src.eval.metrics import build_metrics_from_confusion, get_confusion_matrix
 from src.mistral.inference.batch import run_batch_mistral, upload_file
@@ -37,9 +37,9 @@ def generate_synthetic_samples(args):
     text_blocks = load_and_process_ipcc_reports()
 
     generate_request_file_for_accurate_sample_gen(ipcc_report_blocks=text_blocks)
-    upload_file(DATA_SYNTHESIS_FILE_NAME)
+    upload_file(DATA_SYNTHETIC_FILE_NAME)
     run_batch_mistral(
-        file_name=DATA_SYNTHESIS_FILE_NAME,
+        file_name=DATA_SYNTHETIC_FILE_NAME,
         model="mistral-large-latest",
         job_type="data-synthesis",
     )
@@ -90,7 +90,6 @@ def evaluate(args):
 
     confusion_matrix = get_confusion_matrix(result)
     metrics = build_metrics_from_confusion(confusion_matrix)
-
     metrics.to_csv(join(result_sub_dir, "metrics.csv"))
     confusion_matrix.to_csv(join(result_sub_dir, "confusion_matrix.csv"))
     result.to_csv(join(result_sub_dir, "prediction.csv"), index=False)
@@ -189,6 +188,7 @@ def main():
             "tuned-1-epoch",
             "tuned-3-epochs",
             "tuned-10-epochs",
+            "mistral-large-latest",
         ],
         default="ministral-3b-latest",
         help="Model to use (default: ministral-3b-latest)",

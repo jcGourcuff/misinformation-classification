@@ -1,306 +1,14 @@
-# Fake News Detection & Source Attribution
+# Misinformation Classification with Mistral API
 
+## Setup
 
-# Use Case Description
+Have an Mistral API key stored in a file at `./env/MISTRAL_API_KEY`
 
-Dataset: [Dataset Card for Climate Disinformation quotes database from QuotaClimat & Data For Good
-](https://huggingface.co/datasets/QuotaClimat/frugalaichallenge-text-train#dataset-card-for-climate-disinformation-quotes-database-from-quotaclimat--data-for-good)
-
-Use Case: Use LLM to classify statements or headlines as fake/true and optionally explain why
-
-LLM Application:
-
-Baseline: Prompted truth classification
-
-Improvement: Use RAG to cross-check claim with news articles / Wikipedia
-
-Impact: Huge societal benefit (education, journalism, politics)
-
-Focus on climate change disinformation
-
-
-
-# Plan
-
-- Dataset preparation: huggig face dataset + positive examples
-    - cite IPCC reports
-- Demonstratiuon of sub classification of negative Impact
-- Base Model
-- Evaluation
-- RAG
-- Fine Tuning
-- Slides
-
-- Truth is irremdiably austere
-
-# synthetix data
-
-- example dead serious:
-    - "Human activities have unequivocally increased well-mixed greenhouse gas concentrations since 1750, with CO2 reaching 410 ppm, CH4 1866 ppb, and N2O 332 ppb in 2019. Each of the last four decades has been successively warmer than any preceding decade since 1850, with a global surface temperature increase of 1.09°C in 2011-2020 compared to 1850-1900."
-    - "Since 1950, global land precipitation has likely increased, particularly since the 1980s, with human influence contributing to these changes and the poleward shift of mid-latitude storm tracks in both hemispheres."
-
-- example fuzzy:
-    - "Oh, the ice is melting because of us humans—glaciers are shrinking, Arctic ice is vanishing, and even the Greenland Ice Sheet is dripping away, but don't worry about Antarctica, it's just chilling with no significant trend!"
-
-# First Binary classificatrion
-
-## ministral 3b
-- 'not_relevant' sub label removed
-- missinformation sub labels merged as one class 'missinformation'
-- Binary calssification accuate statement vs missinformation
-- result from conufusion matrix: 
-    - good precision on missinformation
-    - ~ random guess on accurate statements
-- focus on misclassified accurate statements
-    - personae plays a role but little
-    - huge impact of emotion: delusional > sarcastic >> angry >> rest 
-
-- example misclassified misinformation:
-    - Atmospheric CO2 is not a pollutant. It is the single most important chemical constituent of the cycles of plant and animal life
-    - Earth’s temperature naturally warms and cools cyclically throughout time, and warmer periods are typically more conducive to human thriving than colder periods.
-    - Human flourishing depends on energy use, often in invisible and unnoticed ways. A reliable energy supply can feed the hungry, take care of the sick, and ensure a prosperous economic future for society.  It promotes freedom and independence around the world and right here at home,
-                    accurate statement  misinformation
-accurate statement                 323             242
-misinformation                      66            4404
-                    Precision  Recall  F1-Score
-accurate statement      83.03   57.17     67.72
-misinformation          94.79   98.52     96.62
-Average                 88.91   77.84     82.17
-
-## ministral 8b
-- way better recall on accurate statements
-- but much worse on all other metrics
-- accurate statement  FPs only on delusional / sarcastic -> confirms that it is about tone
-                    accurate statement  misinformation
-accurate statement                 518              47
-misinformation                     826            3644
-                    Precision  Recall  F1-Score
-accurate statement      38.54   91.68     54.27
-misinformation          98.73   81.52     89.30
-Average                 68.64   86.60     71.78
-
-## mistral small
-- way better recall on accurate statements
-- Same problem as ministral 8b but less pronounced
-
-                    accurate statement  misinformation
-accurate statement                 521              44
-misinformation                     457            4013
-                    Precision  Recall  F1-Score
-accurate statement      53.27   92.21     67.53
-misinformation          98.92   89.78     94.13
-Average                 76.10   91.00     80.83
-
-- misnformatioon classified as accurate examples:
-   - Solar, wind and hydropower need help. They can’t produce energy that is available around the clock.
-   - In particular, they helped spread a false narrative that arson — and not climate change — was largely to blame for the fires. ‘Bushfires: Firebugs fuelling crisis as national arson arrest toll hits 183,’ read one headline in The Australian, on January 8, 2020. Picked up by Donald Trump, the story was then repeated to millions of Americans by Fox News, also controlled by the Murdoch family.
-   - For the past 4567 million years, the sun and the Earth's orbit have driven climate change cycles.
-
-# Split misinformation into sub classes
-
-## ministral 3b
-
-                               Precision  Recall  F1-Score
-accurate statement                 97.65   14.64     25.46
-fossil fuels needed                73.66   52.80     61.51
-not bad                            25.19   76.62     37.91
-not happening                      49.29   84.19     62.18
-not human                          57.93   58.35     58.14
-proponents biased                  86.26   43.41     57.76
-science unreliable                 55.28   64.75     59.64
-solutions harmful unnecessary      73.04   19.28     30.51
-Average                            64.79   51.76     49.14
-
-## ministral 8b
-
-                               Precision  Recall  F1-Score
-accurate statement                 84.34   54.14     65.95
-fossil fuels needed                76.75   61.19     68.09
-not bad                            51.83   40.52     45.48
-not happening                      54.27   78.11     64.04
-not human                          79.12   30.81     44.35
-proponents biased                  90.00   39.18     54.59
-science unreliable                 36.97   88.62     52.17
-solutions harmful unnecessary      81.12   35.58     49.46
-Average                            69.30   53.52     55.52
-
-## mistral small
-
-                               Precision  Recall  F1-Score
-accurate statement                 77.13   86.24     81.43
-fossil fuels needed                64.90   81.47     72.25
-not bad                            66.77   55.84     60.82
-not happening                      88.14   65.27     75.00
-not human                          72.39   66.29     69.21
-proponents biased                  71.59   80.67     75.86
-science unreliable                 74.78   53.00     62.03
-solutions harmful unnecessary      59.80   76.20     67.01
-Average                            71.94   70.62     70.45
-
-## fine Tuning
-
-v0: ministral 3b 3 epoch, 0.0001lr
-v1: ministral 3b 3 epoch, 0.0001lr
-
-### zero shot, ministral 3b, validation set (~ 1000 samples)
-                               Precision  Recall  F1-Score
-accurate statement                 88.64   34.21     49.37
-fossil fuels needed                90.91   17.54     29.41
-not bad                            24.77   70.13     36.61
-not happening                      53.12   80.41     63.98
-not human                          84.62    7.86     14.38
-proponents biased                  88.50   64.10     74.35
-science unreliable                 43.25   68.12     52.91
-solutions harmful unnecessary      54.69   22.58     31.96
-Average                            66.06   45.62     44.12
-
-### few shot, ministral 3b, validation set (~ 1000 samples) -> ok in terms of repr of original perf.
-
-                               Precision  Recall  F1-Score
-accurate statement                100.00   30.97     47.29
-fossil fuels needed                96.15   44.64     60.97
-not bad                            34.52   76.32     47.54
-not happening                      59.68   75.51     66.67
-not human                          68.52   26.62     38.34
-proponents biased                  84.38   52.26     64.54
-science unreliable                 34.35   84.91     48.91
-solutions harmful unnecessary      77.42   15.58     25.94
-Average                            69.38   50.85     50.03
-
-### zero/few shot, fine tuned ministral 3b, validation set (~ 1000 samples)
-
-
-#### 1 epoch model (v1): 
-    Train loss	Validation loss	Validation mean token accuracy
-	0.371709	0.499476	1.4137
-
-- zero shot
-                               Precision  Recall  F1-Score
-accurate statement                 96.81   79.82     87.50
-fossil fuels needed                89.19   57.89     70.21
-not bad                            74.03   74.03     74.03
-not happening                      82.71   74.32     78.29
-not human                          70.34   72.86     71.58
-proponents biased                  79.11   80.13     79.62
-science unreliable                 69.88   72.50     71.17
-solutions harmful unnecessary      67.51   85.81     75.57
-Average                            78.70   74.67     76.00
-
-- few shot
-                               Precision  Recall  F1-Score
-accurate statement                 97.75   76.99     86.14
-fossil fuels needed                77.78   75.00     76.36
-not bad                            58.93   86.84     70.21
-not happening                      77.33   78.91     78.11
-not human                          67.38   68.35     67.86
-proponents biased                  78.34   79.35     78.84
-science unreliable                 72.92   66.04     69.31
-solutions harmful unnecessary      78.95   77.92     78.43
-Average                            76.17   76.18     75.66
-
-
-#### 3 epoch model (v0): 
-    Train loss	Validation loss	Validation mean token accuracy
-    0.163866	0.255559	1.193798
-
-- zero shot
-
-                               Precision  Recall  F1-Score
-accurate statement                 96.55   98.25     97.39
-fossil fuels needed                96.88   54.39     69.67
-not bad                            80.25   84.42     82.28
-not happening                      83.33   87.84     85.53
-not human                          83.97   78.57     81.18
-proponents biased                  86.23   76.28     80.95
-science unreliable                 76.88   76.88     76.88
-solutions harmful unnecessary      72.54   90.32     80.46
-Average                            84.58   80.87     81.79
-
-- few shot 
-                               Precision  Recall  F1-Score
-accurate statement                 96.36   93.81     95.07
-fossil fuels needed                93.55   51.79     66.67
-not bad                            77.53   90.79     83.64
-not happening                      76.47   88.44     82.02
-not human                          74.03   82.01     77.82
-proponents biased                  78.57   78.06     78.31
-science unreliable                 85.98   57.86     69.17
-solutions harmful unnecessary      72.28   86.36     78.70
-Average                            81.85   78.64     78.92
-
-#### 10 epoch model (v3): 
-    Train loss	Validation loss	Validation mean token accuracy
-	0.031279	0.233954	1.176054
-
-- zero shot
-
-                               Precision  Recall  F1-Score
-accurate statement                 98.28  100.00     99.13
-fossil fuels needed                95.12   68.42     79.59
-not bad                            84.29   76.62     80.27
-not happening                      83.78   83.78     83.78
-not human                          81.43   81.43     81.43
-proponents biased                  83.11   78.85     80.92
-science unreliable                 75.00   76.88     75.93
-solutions harmful unnecessary      76.11   88.39     81.79
-Average                            84.64   81.80     82.86
-
-- few shot
-                               Precision  Recall  F1-Score
-accurate statement                 99.10   97.35     98.22
-fossil fuels needed                87.23   73.21     79.61
-not bad                            86.36   75.00     80.28
-not happening                      82.58   87.07     84.77
-not human                          74.84   85.61     79.86
-proponents biased                  74.57   83.23     78.66
-science unreliable                 78.63   64.78     71.04
-solutions harmful unnecessary      80.89   82.47     81.67
-Average                            83.02   81.09     81.76
-
-
---> Model learned, probably some underfit at 1 epoch, and some overfit at 10 epochs
-
-
-    
-
-# What could have been done
-- Better use/prior research on emotions
-- Reformulate mis information to aligne tones
-- use confidence score 
-- reuse uploaded datasets and associated code repetition
-- tests
-- Should I have used "classifiers" instead of completion models ? Not clear to me, what if the next question is "why" ? 
-
-# info in presentation
-
-- use case description
-- summary tasks and main results
-- more findings
-- repo structure
-- logging
-
-
-# General process
-
-- Get / Clean all data
-- Given a task
-    - Create clean dataset(s)
-    - Create prompt(s) & request files
-    - Run task (e.g. finetune, inference)
-    - Fetch results & evaluate
-
-
-
-
-# How to Use the Document Processing and Classification Tool
-
-This tool provides functionalities for loading data, generating synthetic samples, and performing classification tasks. Below are the instructions for using the tool.
-
-## Commands
+## How to Use
 
 ### Load Data
 
-To load data using Mistral's API:
+Load data from both data sources, and parse the IPCC reports with OCR:
 
 ```bash
 python main.py load
@@ -308,13 +16,17 @@ python main.py load
 
 ### Generate Synthetic Samples
 
-To generate synthetic accurate quote samples:
+To generate synthetic accurate quote samples using Mistral Large:
 
 ```bash
 python main.py synthesize
 ```
 
 ### Classification Task
+
+You are now ready to perform classification tasks. 
+
+All tasks are done in batches - so that you must wait a bit bewteen the run and eval steps.
 
 To perform classification tasks, use the `class` command with the following options:
 
@@ -336,24 +48,31 @@ python main.py class --task <task_type> --stage <stage> [--model <model_name>] [
   - `tuned-1-epoch`
   - `tuned-3-epochs`
   - `tuned-10-epochs`
-  Default is `ministral-3b-latest`.
+
+  Default is `ministral-3b-latest`. The model refered to in the presention is `tuned-10-epochs`.
 - `--few-shot`: Use few-shot learning. Default is `False`. Note that zero-shot is not available for binary classification.
 - `--eval-set`: Evaluation set to use. Choose from:
   - `global`: For all data.
   - `validation`: For the validation set used for fine-tuning.
+  
   Default is `global`.
 
 #### Example Usage
 
 ```bash
-python main.py class --task binary --stage build --model ministral-3b-latest --few-shot --eval-set global
+# Model doesn't matter at this stage
+python main.py class --task multiclass --stage build --few-shot --eval-set validation
 ```
 
 ```bash
-python main.py class --task multiclass --stage eval --model tuned-3-epochs --eval-set validation
+python main.py class --task multiclass --stage run --few-shot --model ministral-3b-latest --eval-set validation
 ```
 
-## Notes
+```bash
+python main.py class --task multiclass --stage eval --few-shot --model ministral-3b-latest --eval-set validation
+```
 
-- Ensure that the necessary data and configurations are set up before running the commands.
-- The tool uses Mistral's API for certain operations, so ensure you have the proper access and credentials.
+# Data Sources
+
+- [IPCC Reports](https://www.ipcc.ch/reports/)
+- [QuotaClimat Dataset](https://huggingface.co/datasets/QuotaClimat/frugalaichallenge-text-train)

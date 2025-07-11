@@ -4,7 +4,7 @@ import uuid
 
 from mistralai import JSONSchema, ResponseFormat
 
-from src.conf import DATA_SYNTHESIS_FILE_NAME
+from src.conf import DATA_SYNTHETIC_FILE_NAME
 from src.mistral.inference.batch import BatchedPrompt, BatchRequest
 from src.mistral.inference.simple import run_mistral
 from src.utils import logger
@@ -41,9 +41,9 @@ def generate_request_file_for_accurate_sample_gen(
                 )
             )
     logger.info(
-        "Generated %s prompts for %s", len(batch_elems), DATA_SYNTHESIS_FILE_NAME
+        "Generated %s prompts for %s", len(batch_elems), DATA_SYNTHETIC_FILE_NAME
     )
-    BatchRequest(prompts=batch_elems).to_jsonl(file_name=DATA_SYNTHESIS_FILE_NAME)
+    BatchRequest(prompts=batch_elems).to_jsonl(file_name=DATA_SYNTHETIC_FILE_NAME)
 
 
 def generate_accurate_data_sample(prompt: str) -> str:

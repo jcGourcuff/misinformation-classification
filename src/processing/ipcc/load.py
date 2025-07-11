@@ -3,7 +3,7 @@ from os.path import join
 
 import pandas as pd
 
-from src.conf import DATA_SYNTHESIS_FILE_NAME, IPCC_DIR
+from src.conf import DATA_SYNTHETIC_FILE_NAME, IPCC_DIR
 from src.mistral.inference.batch import get_batch_job_result
 
 
@@ -14,7 +14,7 @@ def get_accurate_quotes(reload: bool = False) -> pd.DataFrame:
             "emotion": [],
             "quote": [],
         }
-        for item in get_batch_job_result(file_name=DATA_SYNTHESIS_FILE_NAME):
+        for item in get_batch_job_result(file_name=DATA_SYNTHETIC_FILE_NAME):
             split_custom_id = item["custom_id"].split("_")
             # hotfix TODO
             if "climate_enthusiast" in item["custom_id"]:
@@ -32,6 +32,6 @@ def get_accurate_quotes(reload: bool = False) -> pd.DataFrame:
             dataset["quote"].append(json.loads(content)["text"])
         dataset_as_df = pd.DataFrame(dataset)
         dataset_as_df.to_csv(
-            join(IPCC_DIR, f"{DATA_SYNTHESIS_FILE_NAME}.csv"), index=False
+            join(IPCC_DIR, f"{DATA_SYNTHETIC_FILE_NAME}.csv"), index=False
         )
-    return pd.read_csv(join(IPCC_DIR, f"{DATA_SYNTHESIS_FILE_NAME}.csv"))
+    return pd.read_csv(join(IPCC_DIR, f"{DATA_SYNTHETIC_FILE_NAME}.csv"))
